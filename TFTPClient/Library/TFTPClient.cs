@@ -30,15 +30,6 @@ using System.Net.Sockets;
 
 namespace CodePlex.JPMikkers.TFTP.Client
 {
-    [Serializable()]
-    public class TFTPException : Exception
-    {
-        public TFTPException() : base() { }
-        public TFTPException(string message) : base(message) { }
-        public TFTPException(string message, System.Exception inner) : base(message, inner) { }
-        protected TFTPException(System.Runtime.Serialization.SerializationInfo info,System.Runtime.Serialization.StreamingContext context) { }
-    }
-
     public partial class TFTPClient : IDisposable
     {
         private const int DefaultBlockSize = 512;
@@ -87,18 +78,6 @@ namespace CodePlex.JPMikkers.TFTP.Client
         private ushort blockNumber;
         private Dictionary<string, string> requestedOptions = new Dictionary<string, string>();
         private bool init;
-
-        public static T Clip<T>(T value, T minValue, T maxValue) where T : IComparable<T>
-        {
-            T result;
-            if (value.CompareTo(minValue) < 0)
-                result = minValue;
-            else if (value.CompareTo(maxValue) > 0)
-                result = maxValue;
-            else
-                result = value;
-            return result;
-        }
 
         private void Trace(Func<string> constructMsg)
         {
@@ -156,7 +135,17 @@ namespace CodePlex.JPMikkers.TFTP.Client
             }
         }
 
-
+        /// <summary>
+        /// This method performs the TFTP request/response cycle in a loop, where each response is interpreted by a lambda function.
+        /// The result of this lambda function determines the following step in the cycle:
+        /// 
+        /// Drop        : drop the last incoming packet, resume waiting for a new one. Drop does not reset the packet timeout.
+        /// Retry       : resend the last outgoing packet. This can only be done up to the configured maximum number of retries.
+        /// SendNew     : send a new outgoing packet.
+        /// SendFinal   : send one last outgoing packet before stopping
+        /// Done        : completed
+        /// </summary>
+        /// <param name="step">the packet interpretation function</param>
         private void PumpPackets(Func<TFTPPacket, Instruction> step)
         {
             int retry = 0;
@@ -172,7 +161,6 @@ namespace CodePlex.JPMikkers.TFTP.Client
                 {
                     var response = ReceivePacket((int)Math.Max(0, (timeout * 1000) - stopWatch.ElapsedMilliseconds));
                     instruction = step(response);
-                    //Console.WriteLine("Action={0}", instruction);
                 } while (instruction == Instruction.Drop);
 
                 if (instruction == Instruction.Retry)
@@ -198,10 +186,21 @@ namespace CodePlex.JPMikkers.TFTP.Client
             }
         }
 
+        /// <summary>
+        /// This method does the first level of response interpretation (see: PumpPackets). It takes care of the following tasks:
+        /// - on timeout receiving the response : retry sending the request
+        /// - drop responses that aren't from the expected sender
+        /// - everything else: forward them to the next level of response interpretation by way of calling the lambda function.
+        /// </summary>
+        /// <param name="packet">the incoming response packet, or null on timeout</param>
+        /// <param name="step">the nested packet interpretation function</param>
+        /// <returns></returns>
         private Instruction FilterPacket(TFTPPacket packet, Func<TFTPPacket, Instruction> step)
         {
+            // on timeout receiving the response : retry sending the request
             if (packet == null) return Instruction.Retry;
 
+            /// packet isn't coming from the expected address: drop
             if (!packet.EndPoint.Address.Equals(peerEndPoint.Address))
             {
                 Trace(() => string.Format("Got response from {0}, but {1} expected, dropping packet", packet.EndPoint, peerEndPoint));
@@ -210,6 +209,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
 
             if (!init)
             {
+                /// packet isn't coming from the expected port: drop
                 if (packet.EndPoint.Port != peerEndPoint.Port)
                 {
                     Trace(() => string.Format("Got response from {0}, but {1} expected, dropping packet", packet.EndPoint, peerEndPoint));
@@ -217,8 +217,11 @@ namespace CodePlex.JPMikkers.TFTP.Client
                 }
             }
 
+            // packet checks out ok, let the nested function interpret it
             var result = step(packet);
 
+            // if the nested function accepted the packet, it's safe to assume that the packet endpoint is 
+            // the peer endpoint that we should check for from now on.
             if (result != Instruction.Drop && result != Instruction.Retry)
             {
                 peerEndPoint = packet.EndPoint;
@@ -231,7 +234,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
         public TFTPClient(IPEndPoint serverEndPoint, Settings settings)
         {
             this.serverEndPoint = serverEndPoint;
-            this.settings = settings;
+            this.settings = settings ?? new Settings();
             bool ipv6 = (serverEndPoint.AddressFamily == AddressFamily.InterNetworkV6);
             socket = new Socket(serverEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
             socket.SendBufferSize = 65536;
@@ -479,7 +482,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
             return new ArraySegment<byte>(buf, 0, done);
         }
 
-        public static void Download(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings)
+        public static void Download(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings=null)
         {
             using (Stream localStream = File.Create(localFilename))
             {
@@ -487,7 +490,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
             }
         }
 
-        public static void Download(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings)
+        public static void Download(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings=null)
         {
             using (var session = new TFTPClient(serverEndPoint, settings))
             {
@@ -495,7 +498,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
             }
         }
 
-        public static void Upload(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings)
+        public static void Upload(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings=null)
         {
             using (Stream localStream = File.OpenRead(localFilename))
             {
@@ -503,7 +506,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
             }
         }
 
-        public static void Upload(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings)
+        public static void Upload(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings=null)
         {
             using (var session = new TFTPClient(serverEndPoint, settings))
             {
