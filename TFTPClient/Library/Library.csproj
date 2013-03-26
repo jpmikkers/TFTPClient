@@ -68,6 +68,8 @@
     <Compile Include="TFTPClient_Packet_Unknown.cs" />
     <Compile Include="TFTPClient_Packet_WriteRequest.cs" />
     <Compile Include="TFTPClient_Settings.cs" />
+    <Compile Include="TFTPClient_Utils.cs" />
+    <Compile Include="TFTPException.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
