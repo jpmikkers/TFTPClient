@@ -233,8 +233,9 @@ namespace CodePlex.JPMikkers.TFTP.Client
 
         public TFTPClient(IPEndPoint serverEndPoint, Settings settings)
         {
+            settings = settings ?? new Settings();
             this.serverEndPoint = serverEndPoint;
-            this.settings = settings ?? new Settings();
+            this.settings = settings;
             bool ipv6 = (serverEndPoint.AddressFamily == AddressFamily.InterNetworkV6);
             socket = new Socket(serverEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
             socket.SendBufferSize = 65536;
