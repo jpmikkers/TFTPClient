@@ -25,8 +25,22 @@ using System;
 
 namespace CodePlex.JPMikkers.TFTP.Client
 {
+
     public partial class TFTPClient : IDisposable
     {
+        public class TraceEventArgs : EventArgs
+        {
+            public string Message { get; set; }
+        }
+
+        public class ProgressEventArgs : EventArgs
+        {
+            public bool IsUpload { get; set; }
+            public string Filename { get; set; }
+            public long Transferred { get; set; }
+            public long TransferSize { get; set; }
+        }
+
         public class Settings
         {
             public bool DontFragment { get; set; }
@@ -35,8 +49,8 @@ namespace CodePlex.JPMikkers.TFTP.Client
             public TimeSpan ResponseTimeout { get; set; }
             public int Retries { get; set; }
             public TimeSpan ProgressInterval { get; set; }
-            public OnProgressDelegate OnProgress { get; set; }
-            public OnTraceDelegate OnTrace { get; set; }
+            public EventHandler<TraceEventArgs> OnTrace;
+            public EventHandler<ProgressEventArgs> OnProgress;
 
             public Settings()
             {
