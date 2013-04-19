@@ -48,15 +48,16 @@ namespace CodePlex.JPMikkers.TFTP.Client
             Done        // completed
         }
 
-        private IPEndPoint serverEndPoint;
-        private IPEndPoint peerEndPoint;
+        private IPEndPoint m_ServerEndPoint;
+        private IPEndPoint m_PeerEndPoint;
 
-        private string filename;
-        private Stream stream;
-        private Settings settings;
-        private TFTPPacket request;
-        private int blockSize;
-        private int timeout;
+        private bool m_IsUpload;
+        private string m_Filename;
+        private Stream m_Stream;
+        private Settings m_Settings;
+        private TFTPPacket m_Request;
+        private int m_BlockSize;
+        private int m_Timeout;
 
         private long m_Transferred;
         private long m_TransferSize;
@@ -68,33 +69,33 @@ namespace CodePlex.JPMikkers.TFTP.Client
         const uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;
         internal const int MaxTFTPPacketSize = MaxBlockSize + 4;
 
-        private Socket socket;
+        private Socket m_Socket;
         private byte[] m_ReceiveBuffer;
 
         /// <summary>
         /// During downloads, blocknumber is the number of the block that we expect to receive, and which we will ACK.
         /// During uploads, blocknumber is the number of the block that we sent and expect an ACK for.
         /// </summary>
-        private ushort blockNumber;
-        private Dictionary<string, string> requestedOptions = new Dictionary<string, string>();
-        private bool init;
+        private ushort m_BlockNumber;
+        private Dictionary<string, string> m_RequestedOptions = new Dictionary<string, string>();
+        private bool m_Init;
 
         private void Trace(Func<string> constructMsg)
         {
-            if (settings.OnTrace != null)
+            if (m_Settings.OnTrace != null)
             {
-                settings.OnTrace(constructMsg());
+                m_Settings.OnTrace(this, new TraceEventArgs{ Message = constructMsg() });
             }
         }
 
         private void Progress(bool force)
         {
-            if (settings.OnProgress != null)
+            if (m_Settings.OnProgress != null)
             {
-                if (force || (m_ProgressStopwatch.ElapsedMilliseconds - m_LastProgressTime) >= (long)settings.ProgressInterval.TotalMilliseconds)
+                if (force || (m_ProgressStopwatch.ElapsedMilliseconds - m_LastProgressTime) >= (long)m_Settings.ProgressInterval.TotalMilliseconds)
                 {
                     m_LastProgressTime = m_ProgressStopwatch.ElapsedMilliseconds;
-                    settings.OnProgress(filename, m_Transferred, m_TransferSize);
+                    m_Settings.OnProgress(this, new ProgressEventArgs { Filename = m_Filename, IsUpload = m_IsUpload, Transferred = m_Transferred, TransferSize = m_TransferSize });
                 }
             }
         }
@@ -105,7 +106,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
             var ms = new MemoryStream();
             msg.Serialize(ms);
             byte[] buffer = ms.ToArray();
-            socket.SendTo(buffer, 0, buffer.Length, SocketFlags.None, msg.EndPoint);
+            m_Socket.SendTo(buffer, 0, buffer.Length, SocketFlags.None, msg.EndPoint);
         }
 
         private TFTPPacket ReceivePacket(int timeout)
@@ -114,9 +115,9 @@ namespace CodePlex.JPMikkers.TFTP.Client
 
             try
             {
-                socket.ReceiveTimeout = timeout;
-                EndPoint responseEndPoint = new IPEndPoint(serverEndPoint.Address, serverEndPoint.Port);
-                int len = socket.ReceiveFrom(m_ReceiveBuffer, ref responseEndPoint);
+                m_Socket.ReceiveTimeout = timeout;
+                EndPoint responseEndPoint = new IPEndPoint(m_ServerEndPoint.Address, m_ServerEndPoint.Port);
+                int len = m_Socket.ReceiveFrom(m_ReceiveBuffer, ref responseEndPoint);
                 var result = TFTPPacket.Deserialize(new MemoryStream(m_ReceiveBuffer, 0, len, false, true));
                 result.EndPoint = (IPEndPoint)responseEndPoint;
                 Trace(() => string.Format("<- [{0}] {1}", result.EndPoint, result.ToString()));
@@ -154,24 +155,24 @@ namespace CodePlex.JPMikkers.TFTP.Client
 
             do
             {
-                SendPacket(request);
+                SendPacket(m_Request);
                 stopWatch.Restart();
 
                 do
                 {
-                    var response = ReceivePacket((int)Math.Max(0, (timeout * 1000) - stopWatch.ElapsedMilliseconds));
+                    var response = ReceivePacket((int)Math.Max(0, (m_Timeout * 1000) - stopWatch.ElapsedMilliseconds));
                     instruction = step(response);
                 } while (instruction == Instruction.Drop);
 
                 if (instruction == Instruction.Retry)
                 {
-                    if (++retry > settings.Retries)
+                    if (++retry > m_Settings.Retries)
                     {
-                        throw new TFTPException(string.Format("Remote side didn't respond after {0} retries", settings.Retries));
+                        throw new TFTPException(string.Format("Remote side didn't respond after {0} retries", m_Settings.Retries));
                     }
                     else
                     {
-                        Trace(() => string.Format("No response, retry {0} of {1}", retry, settings.Retries));
+                        Trace(() => string.Format("No response, retry {0} of {1}", retry, m_Settings.Retries));
                     }
                 }
                 else
@@ -182,7 +183,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
 
             if (instruction == Instruction.SendFinal)
             {
-                SendPacket(request);
+                SendPacket(m_Request);
             }
         }
 
@@ -201,18 +202,18 @@ namespace CodePlex.JPMikkers.TFTP.Client
             if (packet == null) return Instruction.Retry;
 
             /// packet isn't coming from the expected address: drop
-            if (!packet.EndPoint.Address.Equals(peerEndPoint.Address))
+            if (!packet.EndPoint.Address.Equals(m_PeerEndPoint.Address))
             {
-                Trace(() => string.Format("Got response from {0}, but {1} expected, dropping packet", packet.EndPoint, peerEndPoint));
+                Trace(() => string.Format("Got response from {0}, but {1} expected, dropping packet", packet.EndPoint, m_PeerEndPoint));
                 return Instruction.Drop;
             }
 
-            if (!init)
+            if (!m_Init)
             {
                 /// packet isn't coming from the expected port: drop
-                if (packet.EndPoint.Port != peerEndPoint.Port)
+                if (packet.EndPoint.Port != m_PeerEndPoint.Port)
                 {
-                    Trace(() => string.Format("Got response from {0}, but {1} expected, dropping packet", packet.EndPoint, peerEndPoint));
+                    Trace(() => string.Format("Got response from {0}, but {1} expected, dropping packet", packet.EndPoint, m_PeerEndPoint));
                     return Instruction.Drop;
                 }
             }
@@ -224,8 +225,8 @@ namespace CodePlex.JPMikkers.TFTP.Client
             // the peer endpoint that we should check for from now on.
             if (result != Instruction.Drop && result != Instruction.Retry)
             {
-                peerEndPoint = packet.EndPoint;
-                init = false;
+                m_PeerEndPoint = packet.EndPoint;
+                m_Init = false;
             }
 
             return result;
@@ -234,18 +235,18 @@ namespace CodePlex.JPMikkers.TFTP.Client
         public TFTPClient(IPEndPoint serverEndPoint, Settings settings)
         {
             settings = settings ?? new Settings();
-            this.serverEndPoint = serverEndPoint;
-            this.settings = settings;
+            m_ServerEndPoint = serverEndPoint;
+            m_Settings = settings;
             bool ipv6 = (serverEndPoint.AddressFamily == AddressFamily.InterNetworkV6);
-            socket = new Socket(serverEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-            socket.SendBufferSize = 65536;
-            socket.ReceiveBufferSize = 65536;
-            if (!ipv6) socket.DontFragment = settings.DontFragment;
-            if (settings.Ttl >= 0) socket.Ttl = settings.Ttl;
-            socket.Bind(new IPEndPoint(ipv6 ? IPAddress.IPv6Any : IPAddress.Any, 0));
-            socket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
-            socket.SendTimeout = 10000;
-            socket.ReceiveTimeout = 10000;
+            m_Socket = new Socket(serverEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+            m_Socket.SendBufferSize = 65536;
+            m_Socket.ReceiveBufferSize = 65536;
+            if (!ipv6) m_Socket.DontFragment = settings.DontFragment;
+            if (settings.Ttl >= 0) m_Socket.Ttl = settings.Ttl;
+            m_Socket.Bind(new IPEndPoint(ipv6 ? IPAddress.IPv6Any : IPAddress.Any, 0));
+            m_Socket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
+            m_Socket.SendTimeout = 10000;
+            m_Socket.ReceiveTimeout = 10000;
             m_ReceiveBuffer = new byte[MaxTFTPPacketSize];
         }
 
@@ -259,20 +260,21 @@ namespace CodePlex.JPMikkers.TFTP.Client
         {
             if (disposing)
             {
-                if (socket != null)
+                if (m_Socket != null)
                 {
-                    DelayedDisposer.QueueDelayedDispose(socket, 500);
-                    socket = null;
+                    DelayedDisposer.QueueDelayedDispose(m_Socket, 500);
+                    m_Socket = null;
                 }
             }
         }
 
         public void Download(string filename, Stream stream)
         {
+            m_IsUpload = false;
             Init(filename, stream);
-            requestedOptions.Add(Option_TransferSize, "0");
-            blockNumber = 1;
-            request = new TFTPPacket_ReadRequest() { EndPoint = serverEndPoint, Filename = filename, Options = requestedOptions };
+            m_RequestedOptions.Add(Option_TransferSize, "0");
+            m_BlockNumber = 1;
+            m_Request = new TFTPPacket_ReadRequest() { EndPoint = m_ServerEndPoint, Filename = filename, Options = m_RequestedOptions };
             Progress(true);
             PumpPackets(p => FilterPacket(p, DoDownload));
             Progress(true);
@@ -281,6 +283,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
 
         public void Upload(string filename, Stream stream)
         {
+            m_IsUpload = true;
             Init(filename, stream);
 
             try
@@ -289,7 +292,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
 
                 if (m_TransferSize >= 0)
                 {
-                    requestedOptions.Add(Option_TransferSize, m_TransferSize.ToString(CultureInfo.InvariantCulture));
+                    m_RequestedOptions.Add(Option_TransferSize, m_TransferSize.ToString(CultureInfo.InvariantCulture));
                 }
                 else
                 {
@@ -301,8 +304,8 @@ namespace CodePlex.JPMikkers.TFTP.Client
                 m_TransferSize = -1;
             }
 
-            blockNumber = 0;
-            request = new TFTPPacket_WriteRequest() { EndPoint = serverEndPoint, Filename = filename, Options = requestedOptions };
+            m_BlockNumber = 0;
+            m_Request = new TFTPPacket_WriteRequest() { EndPoint = m_ServerEndPoint, Filename = filename, Options = m_RequestedOptions };
             Progress(true);
             PumpPackets(p => FilterPacket(p, DoUpload));
             Progress(true);
@@ -316,12 +319,12 @@ namespace CodePlex.JPMikkers.TFTP.Client
             switch (packet.Code)
             {
                 case Opcode.OptionsAck:
-                    if (init)
+                    if (m_Init)
                     {
                         HandleOptionsAck((TFTPPacket_OptionsAck)packet);
                         // If the transfer was initiated with a Read Request, then an ACK (with the data block number set to 0) is sent by the client to confirm 
                         // the values in the server's OACK packet.
-                        request = new TFTPPacket_Ack() { EndPoint = packet.EndPoint, BlockNumber = 0 };
+                        m_Request = new TFTPPacket_Ack() { EndPoint = packet.EndPoint, BlockNumber = 0 };
                         result = Instruction.SendNew;
                         Progress(true);
                     }
@@ -336,12 +339,12 @@ namespace CodePlex.JPMikkers.TFTP.Client
                     {
                         var responseData = (TFTPPacket_Data)packet;
                         // did we receive the expected blocknumber ?
-                        if (responseData.BlockNumber == blockNumber)
+                        if (responseData.BlockNumber == m_BlockNumber)
                         {
-                            request = new TFTPPacket_Ack { EndPoint = packet.EndPoint, BlockNumber = blockNumber };
-                            stream.Write(responseData.Data.Array, responseData.Data.Offset, responseData.Data.Count);
-                            blockNumber++;
-                            result = (responseData.Data.Count < blockSize) ? Instruction.SendFinal : Instruction.SendNew;
+                            m_Request = new TFTPPacket_Ack { EndPoint = packet.EndPoint, BlockNumber = m_BlockNumber };
+                            m_Stream.Write(responseData.Data.Array, responseData.Data.Offset, responseData.Data.Count);
+                            m_BlockNumber++;
+                            result = (responseData.Data.Count < m_BlockSize) ? Instruction.SendFinal : Instruction.SendNew;
                             m_Transferred += responseData.Data.Count;
                             Progress(false);
                         }
@@ -370,16 +373,16 @@ namespace CodePlex.JPMikkers.TFTP.Client
             switch (packet.Code)
             {
                 case Opcode.OptionsAck:
-                    if (init)
+                    if (m_Init)
                     {
                         HandleOptionsAck((TFTPPacket_OptionsAck)packet);
                         Progress(true);
                         // If the transfer was initiated with a Write Request, then the client begins the transfer with the first DATA packet (blocknr=1), using the negotiated values.  
                         // If the client rejects the OACK, then it sends an ERROR packet, with error code 8, to the server and the transfer is terminated.
-                        blockNumber++;
-                        request = new TFTPPacket_Data() { EndPoint = packet.EndPoint, BlockNumber = blockNumber, Data = ReadData(stream, blockSize) };
+                        m_BlockNumber++;
+                        m_Request = new TFTPPacket_Data() { EndPoint = packet.EndPoint, BlockNumber = m_BlockNumber, Data = ReadData(m_Stream, m_BlockSize) };
                         result = Instruction.SendNew;
-                        m_Transferred += ((TFTPPacket_Data)request).Data.Count;
+                        m_Transferred += ((TFTPPacket_Data)m_Request).Data.Count;
                     }
                     else
                     {
@@ -391,23 +394,23 @@ namespace CodePlex.JPMikkers.TFTP.Client
                 case Opcode.Ack:
                     {
                         var responseData = (TFTPPacket_Ack)packet;
-                        peerEndPoint = packet.EndPoint;
+                        m_PeerEndPoint = packet.EndPoint;
                         // did we receive the expected blocknumber ?
-                        if (responseData.BlockNumber == blockNumber)
+                        if (responseData.BlockNumber == m_BlockNumber)
                         {
                             Progress(false);
                             // was the outstanding request a data packet, and the last one?
-                            if (request is TFTPPacket_Data && ((TFTPPacket_Data)request).Data.Count < blockSize)
+                            if (m_Request is TFTPPacket_Data && ((TFTPPacket_Data)m_Request).Data.Count < m_BlockSize)
                             {
                                 // that was the ack for the last packet, we're done
                                 result = Instruction.Done;
                             }
                             else
                             {
-                                blockNumber++;
-                                request = new TFTPPacket_Data() { EndPoint = packet.EndPoint, BlockNumber = blockNumber, Data = ReadData(stream, blockSize) };
+                                m_BlockNumber++;
+                                m_Request = new TFTPPacket_Data() { EndPoint = packet.EndPoint, BlockNumber = m_BlockNumber, Data = ReadData(m_Stream, m_BlockSize) };
                                 result = Instruction.SendNew;
-                                m_Transferred += ((TFTPPacket_Data)request).Data.Count;
+                                m_Transferred += ((TFTPPacket_Data)m_Request).Data.Count;
                             }
                         }
                         else
@@ -430,39 +433,39 @@ namespace CodePlex.JPMikkers.TFTP.Client
 
         private void Init(string filename, Stream stream)
         {
-            this.filename = filename;
-            this.stream = stream;
-            blockSize = DefaultBlockSize;
-            timeout = (int)Math.Ceiling(settings.ResponseTimeout.TotalSeconds);
-            init = true;
-            requestedOptions = new Dictionary<string, string>();
+            this.m_Filename = filename;
+            this.m_Stream = stream;
+            m_BlockSize = DefaultBlockSize;
+            m_Timeout = (int)Math.Ceiling(m_Settings.ResponseTimeout.TotalSeconds);
+            m_Init = true;
+            m_RequestedOptions = new Dictionary<string, string>();
 
-            if (settings.BlockSize != DefaultBlockSize)
+            if (m_Settings.BlockSize != DefaultBlockSize)
             {
                 // limit blocksize to allowed range
-                requestedOptions.Add(Option_BlockSize, Clip(settings.BlockSize,MinBlockSize,MaxBlockSize).ToString());
+                m_RequestedOptions.Add(Option_BlockSize, Clip(m_Settings.BlockSize,MinBlockSize,MaxBlockSize).ToString());
             }
 
-            requestedOptions.Add(Option_Timeout, Clip(timeout,1,255).ToString());
+            m_RequestedOptions.Add(Option_Timeout, Clip(m_Timeout,1,255).ToString());
 
             m_LastProgressTime = 0;
             m_Transferred = 0;
             m_TransferSize = -1;
             m_ProgressStopwatch.Restart();
 
-            peerEndPoint = new IPEndPoint(serverEndPoint.Address, serverEndPoint.Port);
+            m_PeerEndPoint = new IPEndPoint(m_ServerEndPoint.Address, m_ServerEndPoint.Port);
         }
 
         private void HandleOptionsAck(TFTPPacket_OptionsAck response)
         {
             if (response.Options.ContainsKey(Option_BlockSize))
             {
-                blockSize = int.Parse(response.Options[Option_BlockSize], CultureInfo.InvariantCulture);
+                m_BlockSize = int.Parse(response.Options[Option_BlockSize], CultureInfo.InvariantCulture);
             }
 
             if (response.Options.ContainsKey(Option_Timeout))
             {
-                timeout = int.Parse(response.Options[Option_Timeout], CultureInfo.InvariantCulture);
+                m_Timeout = int.Parse(response.Options[Option_Timeout], CultureInfo.InvariantCulture);
             }
 
             if (response.Options.ContainsKey(Option_TransferSize))

@@ -34,14 +34,14 @@ namespace Client
 {
     class Program
     {
-        private static void OnProgress(string filename,long transferred,long transfersize)
+        private static void OnProgress(object sender, TFTPClient.ProgressEventArgs args)
         {
-            Console.WriteLine("'{0}': {1} of {2}",filename,transferred,transfersize >= 0 ? transfersize.ToString() : "?");
+            Console.WriteLine("'{0}': {1} of {2}", args.Filename, args.Transferred, args.TransferSize >= 0 ? args.TransferSize.ToString() : "?");
         }
 
-        private static void OnTrace(string msg)
+        private static void OnTrace(object sender, TFTPClient.TraceEventArgs args)
         {
-            Console.WriteLine(msg);
+            Console.WriteLine(args.Message);
         }
 
         static int Main(string[] args)

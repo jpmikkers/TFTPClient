@@ -3,20 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Windows Desktop
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{75CBACB4-34BA-4994-BF36-90A86B8F9372}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{577F71FE-F14F-4480-9CD4-E5236F7957B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CmdClient", "Client\CmdClient.csproj", "{577F71FE-F14F-4480-9CD4-E5236F7957B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinClient", "WinClient\WinClient.csproj", "{D82C743E-31B0-44A5-AEC0-8F7B1648799C}"
 EndProject
 Global
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
+		SccNumberOfProjects = 4
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
 		SccLocalPath0 = .
 		SccProjectUniqueName1 = Library\\Library.csproj
 		SccProjectName1 = Library
 		SccLocalPath1 = Library
-		SccProjectUniqueName2 = Client\\Client.csproj
+		SccProjectUniqueName2 = Client\\CmdClient.csproj
 		SccProjectName2 = Client
 		SccLocalPath2 = Client
+		SccProjectUniqueName3 = WinClient\\WinClient.csproj
+		SccProjectName3 = WinClient
+		SccLocalPath3 = WinClient
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +36,10 @@ Global
 		{577F71FE-F14F-4480-9CD4-E5236F7957B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{577F71FE-F14F-4480-9CD4-E5236F7957B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{577F71FE-F14F-4480-9CD4-E5236F7957B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D82C743E-31B0-44A5-AEC0-8F7B1648799C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D82C743E-31B0-44A5-AEC0-8F7B1648799C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D82C743E-31B0-44A5-AEC0-8F7B1648799C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D82C743E-31B0-44A5-AEC0-8F7B1648799C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
