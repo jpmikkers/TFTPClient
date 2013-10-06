@@ -237,10 +237,10 @@ namespace CodePlex.JPMikkers.TFTP.Client
             settings = settings ?? new Settings();
             m_ServerEndPoint = serverEndPoint;
             m_Settings = settings;
+            m_BlockSize = DefaultBlockSize;
             bool ipv6 = (serverEndPoint.AddressFamily == AddressFamily.InterNetworkV6);
             m_Socket = new Socket(serverEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-            m_Socket.SendBufferSize = 65536;
-            m_Socket.ReceiveBufferSize = 65536;
+            SetSocketBufferSize();
             if (!ipv6) m_Socket.DontFragment = settings.DontFragment;
             if (settings.Ttl >= 0) m_Socket.Ttl = settings.Ttl;
             m_Socket.Bind(new IPEndPoint(ipv6 ? IPAddress.IPv6Any : IPAddress.Any, 0));
@@ -453,7 +453,31 @@ namespace CodePlex.JPMikkers.TFTP.Client
             m_TransferSize = -1;
             m_ProgressStopwatch.Restart();
 
+            SetSocketBufferSize();
+
             m_PeerEndPoint = new IPEndPoint(m_ServerEndPoint.Address, m_ServerEndPoint.Port);
+        }
+
+        private void SetSocketBufferSize()
+        {
+            int multiple = 8;
+
+            while (multiple > 0)
+            {
+                try
+                {
+                    var socketBufferSize = multiple * (m_BlockSize + 4);
+                    Trace(() => string.Format("Setting socket buffers to {0}", socketBufferSize));
+                    m_Socket.SendBufferSize = socketBufferSize;
+                    m_Socket.ReceiveBufferSize = socketBufferSize;
+                    break;
+                }
+                catch
+                {
+                    Trace(() => string.Format("Failed to modify socket buffer size"));
+                    multiple /= 2;
+                }
+            }
         }
 
         private void HandleOptionsAck(TFTPPacket_OptionsAck response)
@@ -461,6 +485,7 @@ namespace CodePlex.JPMikkers.TFTP.Client
             if (response.Options.ContainsKey(Option_BlockSize))
             {
                 m_BlockSize = int.Parse(response.Options[Option_BlockSize], CultureInfo.InvariantCulture);
+                SetSocketBufferSize();
             }
 
             if (response.Options.ContainsKey(Option_Timeout))
