@@ -8,7 +8,7 @@ Managed TFTP client implementation, written in C#. Supports:
 - permissive license for commercial use.
 - contains an easy to use library and a command line client
 
-See the wikipage [Documentation](Documentation) for more information on how to use the library from your own code.
+See the wikipage [Documentation](Documentation.md) for more information on how to use the library from your own code.
 
 Here's the help page from the command line utility:
 
@@ -16,7 +16,7 @@ Here's the help page from the command line utility:
 TFTPClient 1.0.0
 Transfers files to and from a remote computer running the TFTP service.
 
-Usage: TFTPClient [options](options)+ host[:port](_port)
+Usage: TFTPClient \[options\]+ host\[:port\]
 
       --get                  get a file from remote to local
       --put                  put a file from local to remote
@@ -32,6 +32,7 @@ Usage: TFTPClient [options](options)+ host[:port](_port)
 
       --silent               don't show progress information
       --ttl=VALUE            set time to live
-  -?, -h, --help             show help
+      -?, -h, --help         show help
+  
 }}
 
