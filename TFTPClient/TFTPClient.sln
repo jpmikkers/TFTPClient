@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Express 2012 for Windows Desktop
+# Visual Studio 15
+VisualStudioVersion = 15.0.26430.14
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{75CBACB4-34BA-4994-BF36-90A86B8F9372}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CmdClient", "Client\CmdClient.csproj", "{577F71FE-F14F-4480-9CD4-E5236F7957B4}"
@@ -8,21 +10,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinClient", "WinClient\WinClient.csproj", "{D82C743E-31B0-44A5-AEC0-8F7B1648799C}"
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs02
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = Library\\Library.csproj
-		SccProjectName1 = Library
-		SccLocalPath1 = Library
-		SccProjectUniqueName2 = Client\\CmdClient.csproj
-		SccProjectName2 = Client
-		SccLocalPath2 = Client
-		SccProjectUniqueName3 = WinClient\\WinClient.csproj
-		SccProjectName3 = WinClient
-		SccLocalPath3 = WinClient
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
