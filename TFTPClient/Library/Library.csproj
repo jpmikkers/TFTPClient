@@ -8,7 +8,7 @@
     <ProjectGuid>{75CBACB4-34BA-4994-BF36-90A86B8F9372}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CodePlex.JPMikkers.TFTP.Client</RootNamespace>
+    <RootNamespace>GitHub.JPMikkers.TFTP.Client</RootNamespace>
     <AssemblyName>TFTPLibrary.Client</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

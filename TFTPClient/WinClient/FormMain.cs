@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
-using CodePlex.JPMikkers.TFTP.Client;
+using GitHub.JPMikkers.TFTP.Client;
 using System.Net;
 using System.Net.Sockets;
 

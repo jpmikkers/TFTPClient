@@ -25,7 +25,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using CodePlex.JPMikkers.TFTP.Client;
+using GitHub.JPMikkers.TFTP.Client;
 using Mono.Options;
 using System.IO;
 using System.Reflection;

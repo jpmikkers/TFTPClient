@@ -27,7 +27,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
 using System.ComponentModel;
-using CodePlex.JPMikkers.TFTP;
+using GitHub.JPMikkers.TFTP;
 
 namespace WinClient
 {

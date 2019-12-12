@@ -24,7 +24,7 @@ THE SOFTWARE.
 using System;
 using System.Threading;
 
-namespace CodePlex.JPMikkers.TFTP.Client
+namespace GitHub.JPMikkers.TFTP.Client
 {
     public class DelayedDisposer
     {

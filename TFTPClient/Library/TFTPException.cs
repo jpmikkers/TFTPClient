@@ -28,7 +28,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 
-namespace CodePlex.JPMikkers.TFTP.Client
+namespace GitHub.JPMikkers.TFTP.Client
 {
     [Serializable()]
     public class TFTPException : Exception

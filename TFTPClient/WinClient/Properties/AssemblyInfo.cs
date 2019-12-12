@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("WinClient")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("JPMikkers")]
 [assembly: AssemblyProduct("WinClient")]
-[assembly: AssemblyCopyright("Copyright ©  2013")]
+[assembly: AssemblyCopyright("Copyright © 2019 Jean-Paul Mikkers")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -6,7 +6,7 @@ The following example shows how to upload a local file "localfile.bin" to a tftp
 
     using System.Net;
     using System.Net.Sockets;
-    using CodePlex.JPMikkers.TFTP.Client;
+    using GitHub.JPMikkers.TFTP.Client;
     ...
     TFTPClient.Upload(
         new IPEndPoint(IPAddress.Parse("192.168.1.10"), 69),
@@ -19,7 +19,7 @@ The following example shows how to download a remote file "remotefile.bin" from 
 
     using System.Net;
     using System.Net.Sockets;
-    using CodePlex.JPMikkers.TFTP.Client;
+    using GitHub.JPMikkers.TFTP.Client;
     ...
     TFTPClient.Download(
         new IPEndPoint(IPAddress.Parse("192.168.1.10"), 69),

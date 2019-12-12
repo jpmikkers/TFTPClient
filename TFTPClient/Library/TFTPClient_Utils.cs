@@ -28,7 +28,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace CodePlex.JPMikkers.TFTP.Client
+namespace GitHub.JPMikkers.TFTP.Client
 {
     public partial class TFTPClient : IDisposable
     {

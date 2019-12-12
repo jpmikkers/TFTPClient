@@ -23,7 +23,7 @@ THE SOFTWARE.
 */
 using System;
 
-namespace CodePlex.JPMikkers.TFTP.Client
+namespace GitHub.JPMikkers.TFTP.Client
 {
 
     public partial class TFTPClient : IDisposable

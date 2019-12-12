@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("JPMikkers")]
 [assembly: AssemblyProduct("TFTPClientLibrary")]
-[assembly: AssemblyCopyright("Copyright © 2013 Jean-Paul Mikkers")]
+[assembly: AssemblyCopyright("Copyright © 2019 Jean-Paul Mikkers")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
