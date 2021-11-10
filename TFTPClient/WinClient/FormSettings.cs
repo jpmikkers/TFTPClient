@@ -22,14 +22,7 @@ THE SOFTWARE.
 
 */
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using WinClient;
 
 namespace WinClient
 {
@@ -53,39 +46,39 @@ namespace WinClient
         public FormSettings()
         {
             InitializeComponent();
-/*
-            textBoxWindowSize.Validating += new CancelEventHandler(textBoxWindowSize_Validating);
-            textBoxWindowSize.Validated += new EventHandler(textBoxWindowSize_Validated);
-            toolTip1.SetToolTip(textBoxWindowSize, 
-                "The number of packets to send in bulk, speeding up the file transfer rate.\r\n" +
-                "This is an advanced option, only use a value greater than 1 if you've\r\n" +
-                "tested that your TFTP client can cope with windowed transfers.\r\n" +
-                "(default: 1)");
- */ 
+            /*
+                        textBoxWindowSize.Validating += new CancelEventHandler(textBoxWindowSize_Validating);
+                        textBoxWindowSize.Validated += new EventHandler(textBoxWindowSize_Validated);
+                        toolTip1.SetToolTip(textBoxWindowSize, 
+                            "The number of packets to send in bulk, speeding up the file transfer rate.\r\n" +
+                            "This is an advanced option, only use a value greater than 1 if you've\r\n" +
+                            "tested that your TFTP client can cope with windowed transfers.\r\n" +
+                            "(default: 1)");
+             */
         }
 
-/*
-        void textBoxWindowSize_Validated(object sender, EventArgs e)
-        {
-            this.errorProvider1.SetError(textBoxWindowSize, "");
-        }
+        /*
+                void textBoxWindowSize_Validated(object sender, EventArgs e)
+                {
+                    this.errorProvider1.SetError(textBoxWindowSize, "");
+                }
 
-        private void textBoxWindowSize_Validating(object sender, CancelEventArgs e)
-        {
-            ushort value;
+                private void textBoxWindowSize_Validating(object sender, CancelEventArgs e)
+                {
+                    ushort value;
 
-            e.Cancel = true;
-            if (ushort.TryParse(textBoxWindowSize.Text, out value))
-            {
-                if (value > 0 && value <= 32) e.Cancel = false;
-            }
+                    e.Cancel = true;
+                    if (ushort.TryParse(textBoxWindowSize.Text, out value))
+                    {
+                        if (value > 0 && value <= 32) e.Cancel = false;
+                    }
 
-            if (e.Cancel)
-            {
-                this.errorProvider1.SetError(textBoxWindowSize, "value must be between 1 and 32 (default: 1)");
-            }
-        }
-*/
+                    if (e.Cancel)
+                    {
+                        this.errorProvider1.SetError(textBoxWindowSize, "value must be between 1 and 32 (default: 1)");
+                    }
+                }
+        */
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);

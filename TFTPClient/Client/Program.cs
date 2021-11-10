@@ -21,13 +21,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
+using GitHub.JPMikkers.TFTP.Client;
+using Mono.Options;
 using System;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using GitHub.JPMikkers.TFTP.Client;
-using Mono.Options;
-using System.IO;
 using System.Reflection;
 
 namespace Client
@@ -64,7 +63,7 @@ namespace Client
                     OnProgress = Program.OnProgress
                 };
 
-                var optionSet = new OptionSet 
+                var optionSet = new OptionSet
                 {
                     "",
                     string.Format("TFTPClient {0}",Assembly.GetExecutingAssembly().GetName().Version.ToString(3)),

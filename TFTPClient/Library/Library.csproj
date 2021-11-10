@@ -4,10 +4,6 @@
     <RootNamespace>GitHub.JPMikkers.TFTP.Client</RootNamespace>
     <AssemblyName>TFTPLibrary.Client</AssemblyName>
     <TargetFramework>net48</TargetFramework>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <AssemblyTitle>TFTPClientLibrary</AssemblyTitle>

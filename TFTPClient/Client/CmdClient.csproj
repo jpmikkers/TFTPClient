@@ -4,10 +4,6 @@
     <RootNamespace>ClientTest</RootNamespace>
     <AssemblyName>TFTPClient</AssemblyName>
     <TargetFramework>net48</TargetFramework>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
     <AssemblyTitle>TFTPClient</AssemblyTitle>
     <Company>JPMikkers</Company>
     <Product>TFTPClient</Product>

@@ -84,7 +84,7 @@ namespace GitHub.JPMikkers.TFTP.Client
         {
             if (m_Settings.OnTrace != null)
             {
-                m_Settings.OnTrace(this, new TraceEventArgs{ Message = constructMsg() });
+                m_Settings.OnTrace(this, new TraceEventArgs { Message = constructMsg() });
             }
         }
 
@@ -443,10 +443,10 @@ namespace GitHub.JPMikkers.TFTP.Client
             if (m_Settings.BlockSize != DefaultBlockSize)
             {
                 // limit blocksize to allowed range
-                m_RequestedOptions.Add(Option_BlockSize, Clip(m_Settings.BlockSize,MinBlockSize,MaxBlockSize).ToString());
+                m_RequestedOptions.Add(Option_BlockSize, Clip(m_Settings.BlockSize, MinBlockSize, MaxBlockSize).ToString());
             }
 
-            m_RequestedOptions.Add(Option_Timeout, Clip(m_Timeout,1,255).ToString());
+            m_RequestedOptions.Add(Option_Timeout, Clip(m_Timeout, 1, 255).ToString());
 
             m_LastProgressTime = 0;
             m_Transferred = 0;
@@ -511,7 +511,7 @@ namespace GitHub.JPMikkers.TFTP.Client
             return new ArraySegment<byte>(buf, 0, done);
         }
 
-        public static void Download(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings=null)
+        public static void Download(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
         {
             using (Stream localStream = File.Create(localFilename))
             {
@@ -519,7 +519,7 @@ namespace GitHub.JPMikkers.TFTP.Client
             }
         }
 
-        public static void Download(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings=null)
+        public static void Download(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings = null)
         {
             using (var session = new TFTPClient(serverEndPoint, settings))
             {
@@ -527,7 +527,7 @@ namespace GitHub.JPMikkers.TFTP.Client
             }
         }
 
-        public static void Upload(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings=null)
+        public static void Upload(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
         {
             using (Stream localStream = File.OpenRead(localFilename))
             {
@@ -535,7 +535,7 @@ namespace GitHub.JPMikkers.TFTP.Client
             }
         }
 
-        public static void Upload(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings=null)
+        public static void Upload(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings = null)
         {
             using (var session = new TFTPClient(serverEndPoint, settings))
             {

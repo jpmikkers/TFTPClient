@@ -22,11 +22,6 @@ THE SOFTWARE.
 
 */
 using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
 
 namespace GitHub.JPMikkers.TFTP.Client
 {

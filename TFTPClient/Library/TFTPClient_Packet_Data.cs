@@ -27,7 +27,7 @@ using System.IO;
 namespace GitHub.JPMikkers.TFTP.Client
 {
     public partial class TFTPClient : IDisposable
-    {       
+    {
         private class TFTPPacket_Data : TFTPPacket
         {
             public ushort BlockNumber { get; set; }
