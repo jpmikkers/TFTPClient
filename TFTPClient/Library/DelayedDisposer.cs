@@ -32,7 +32,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
         private DelayedDisposer(IDisposable obj, int timeOut)
         {
-            m_Timer = new Timer(x => 
+            m_Timer = new Timer(x =>
             {
                 try
                 {

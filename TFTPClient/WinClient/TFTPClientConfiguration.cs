@@ -22,12 +22,6 @@ THE SOFTWARE.
 
 */
 using System;
-using System.Net;
-using System.Collections.Generic;
-using System.Xml.Serialization;
-using System.IO;
-using System.ComponentModel;
-using GitHub.JPMikkers.TFTP;
 
 namespace WinClient
 {

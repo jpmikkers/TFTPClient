@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using GitHub.JPMikkers.TFTP.Client;
+using System;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.IO;
-using GitHub.JPMikkers.TFTP.Client;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WinClient
 {
@@ -100,29 +96,29 @@ namespace WinClient
             settings.LocalFilename = this.textBoxLocalFilename.Text;
             Configuration = settings;
         }
-/*
-        void textBoxServer_Validated(object sender, EventArgs e)
-        {
-            this.errorProvider1.SetError(textBoxServer, "");
-        }
+        /*
+                void textBoxServer_Validated(object sender, EventArgs e)
+                {
+                    this.errorProvider1.SetError(textBoxServer, "");
+                }
 
-        private void textBoxServer_Validating(object sender, CancelEventArgs e)
-        {
-            ushort value;
+                private void textBoxServer_Validating(object sender, CancelEventArgs e)
+                {
+                    ushort value;
 
-            e.Cancel = true;
+                    e.Cancel = true;
 
-            if (ResolveServer(textBoxServer.Text) != null)
-            {
-                e.Cancel = false;
-            }
+                    if (ResolveServer(textBoxServer.Text) != null)
+                    {
+                        e.Cancel = false;
+                    }
 
-            if (e.Cancel)
-            {
-                this.errorProvider1.SetError(textBoxServer, "Not a valid server address");
-            }
-        }
-*/
+                    if (e.Cancel)
+                    {
+                        this.errorProvider1.SetError(textBoxServer, "Not a valid server address");
+                    }
+                }
+        */
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -285,15 +281,15 @@ namespace WinClient
         private static IPEndPoint ResolveServer(string server)
         {
             // nested functions are cool
-            Func<string, int, int> ParseIntDefault = (str, def) => 
-            { 
+            Func<string, int, int> ParseIntDefault = (str, def) =>
+            {
                 int val;
                 return int.TryParse(str, out val) ? val : def;
             };
 
             IPEndPoint result = null;
             IPAddress address;
-            int port=69;
+            int port = 69;
 
             // attempt to parse it as a ipv6 address
             var parts = server.Split(new string[] { "[", "]:" }, StringSplitOptions.RemoveEmptyEntries);
@@ -310,7 +306,7 @@ namespace WinClient
 
                 if (parts.Length > 0)
                 {
-                    if (parts.Length > 1) port = ParseIntDefault(parts[1],69);
+                    if (parts.Length > 1) port = ParseIntDefault(parts[1], 69);
 
                     if (IPAddress.TryParse(parts[0], out address))
                     {
