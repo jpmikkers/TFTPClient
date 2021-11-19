@@ -53,7 +53,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
             public override string ToString()
             {
-                return string.Format("{0}( FileName='{1}', Mode='{2}', Options={{{3}}} )", Code, Filename, Mode, OptionString(Options));
+                return $"{Code}( FileName='{Filename}', Mode='{Mode}', Options={{{OptionString(Options)}}} )";
             }
         }
     }

@@ -59,7 +59,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
             public override string ToString()
             {
-                return string.Format("{0}( BlockNumber={1}, Data=[{2}] )", Code, BlockNumber, HexStr(Data, " ", 8));
+                return $"{Code}( BlockNumber={BlockNumber}, Data=[{HexStr(Data, " ", 8)}] )";
             }
         }
     }

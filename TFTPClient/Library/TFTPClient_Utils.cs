@@ -60,7 +60,7 @@ namespace GitHub.JPMikkers.TFTP.Client
         /// <returns>formatted key-value collection string</returns>
         private static string OptionString(Dictionary<string, string> options)
         {
-            return options.Select(x => String.Format("'{0}'='{1}'", x.Key, x.Value)).Aggregate((x, y) => x + ", " + y);
+            return options.Select(x => $"'{x.Key}'='{x.Value}'").Aggregate((x, y) => x + ", " + y);
         }
 
         /// <summary>

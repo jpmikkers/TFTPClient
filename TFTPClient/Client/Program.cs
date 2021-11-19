@@ -66,7 +66,7 @@ namespace Client
                 var optionSet = new OptionSet
                 {
                     "",
-                    string.Format("TFTPClient {0}",Assembly.GetExecutingAssembly().GetName().Version.ToString(3)),
+                    $"TFTPClient {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}",
                     "Transfers files to and from a remote computer running the TFTP service.",
                     "",
                     "Usage: TFTPClient [options]+ host[:port]",

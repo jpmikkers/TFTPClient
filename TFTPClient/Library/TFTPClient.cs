@@ -102,7 +102,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
         private void SendPacket(TFTPPacket msg)
         {
-            Trace(() => string.Format("-> [{0}] {1}", msg.EndPoint, msg.ToString()));
+            Trace(() => $"-> [{msg.EndPoint}] {msg.ToString()}");
             var ms = new MemoryStream();
             msg.Serialize(ms);
             byte[] buffer = ms.ToArray();
@@ -120,7 +120,7 @@ namespace GitHub.JPMikkers.TFTP.Client
                 int len = m_Socket.ReceiveFrom(m_ReceiveBuffer, ref responseEndPoint);
                 var result = TFTPPacket.Deserialize(new MemoryStream(m_ReceiveBuffer, 0, len, false, true));
                 result.EndPoint = (IPEndPoint)responseEndPoint;
-                Trace(() => string.Format("<- [{0}] {1}", result.EndPoint, result.ToString()));
+                Trace(() => $"<- [{result.EndPoint}] {result.ToString()}");
                 return result;
             }
             catch (SocketException e)
@@ -168,11 +168,11 @@ namespace GitHub.JPMikkers.TFTP.Client
                 {
                     if (++retry > m_Settings.Retries)
                     {
-                        throw new TFTPException(string.Format("Remote side didn't respond after {0} retries", m_Settings.Retries));
+                        throw new TFTPException($"Remote side didn't respond after {m_Settings.Retries} retries");
                     }
                     else
                     {
-                        Trace(() => string.Format("No response, retry {0} of {1}", retry, m_Settings.Retries));
+                        Trace(() => $"No response, retry {retry} of {m_Settings.Retries}");
                     }
                 }
                 else
@@ -204,7 +204,7 @@ namespace GitHub.JPMikkers.TFTP.Client
             /// packet isn't coming from the expected address: drop
             if (!packet.EndPoint.Address.Equals(m_PeerEndPoint.Address))
             {
-                Trace(() => string.Format("Got response from {0}, but {1} expected, dropping packet", packet.EndPoint, m_PeerEndPoint));
+                Trace(() => $"Got response from {packet.EndPoint}, but {m_PeerEndPoint} expected, dropping packet");
                 return Instruction.Drop;
             }
 
@@ -213,7 +213,7 @@ namespace GitHub.JPMikkers.TFTP.Client
                 /// packet isn't coming from the expected port: drop
                 if (packet.EndPoint.Port != m_PeerEndPoint.Port)
                 {
-                    Trace(() => string.Format("Got response from {0}, but {1} expected, dropping packet", packet.EndPoint, m_PeerEndPoint));
+                    Trace(() => $"Got response from {packet.EndPoint}, but {m_PeerEndPoint} expected, dropping packet");
                     return Instruction.Drop;
                 }
             }
@@ -467,14 +467,14 @@ namespace GitHub.JPMikkers.TFTP.Client
                 try
                 {
                     var socketBufferSize = multiple * (m_BlockSize + 4);
-                    Trace(() => string.Format("Setting socket buffers to {0}", socketBufferSize));
+                    Trace(() => $"Setting socket buffers to {socketBufferSize}");
                     m_Socket.SendBufferSize = socketBufferSize;
                     m_Socket.ReceiveBufferSize = socketBufferSize;
                     break;
                 }
                 catch
                 {
-                    Trace(() => string.Format("Failed to modify socket buffer size"));
+                    Trace(() => "Failed to modify socket buffer size");
                     multiple /= 2;
                 }
             }
@@ -501,7 +501,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
         private static void HandleError(TFTPPacket_Error p)
         {
-            throw new TFTPException(string.Format("Server error {0} : {1}", p.ErrorCode, p.ErrorMessage));
+            throw new TFTPException($"Server error {p.ErrorCode} : {p.ErrorMessage}");
         }
 
         private static ArraySegment<byte> ReadData(Stream s, int len)

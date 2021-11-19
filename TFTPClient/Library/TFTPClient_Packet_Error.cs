@@ -58,7 +58,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
             public override string ToString()
             {
-                return string.Format("{0}( ErrorCode={1}, ErrorMessage='{2}' )", Code, ErrorCode, ErrorMessage);
+                return $"{Code}( ErrorCode={ErrorCode}, ErrorMessage='{ErrorMessage}' )";
             }
         }
     }

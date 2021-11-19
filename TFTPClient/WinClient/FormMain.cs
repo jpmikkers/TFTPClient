@@ -256,14 +256,14 @@ namespace WinClient
             }
             else
             {
-                toolStripStatusLabel1.Text = string.Format("({0}/{1} bytes) {2} '{3}'", e.Transferred, (e.TransferSize >= 0) ? e.TransferSize.ToString() : "?", e.IsUpload ? "Uploading" : "Downloading", e.Filename);
+                toolStripStatusLabel1.Text = $"({e.Transferred}/{((e.TransferSize >= 0) ? e.TransferSize.ToString() : "?")} bytes) {(e.IsUpload ? "Uploading" : "Downloading")} '{e.Filename}'";
                 toolStripProgressBar1.Value = (e.TransferSize > 0) ? (int)(100.0 * e.Transferred / e.TransferSize) : 0;
             }
         }
 
         private void HandleException(Exception e)
         {
-            toolStripStatusLabel1.Text = string.Format("Error: '{0}'", e.Message);
+            toolStripStatusLabel1.Text = $"Error: '{e.Message}'";
             MessageBox.Show(this, e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
