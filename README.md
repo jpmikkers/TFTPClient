@@ -15,7 +15,7 @@ Here's the help page from the command line utility:
     TFTPClient 1.0.0
     Transfers files to and from a remote computer running the TFTP service.
 
-    Usage: TFTPClient \[options\]+ host\[:port\]
+    Usage: TFTPClient [options]+ host[:port]
 
       --get                  get a file from remote to local
       --put                  put a file from local to remote
