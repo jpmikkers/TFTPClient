@@ -48,13 +48,13 @@ namespace GitHub.JPMikkers.TFTP.Client
             Done        // completed
         }
 
-        private IPEndPoint m_ServerEndPoint;
+        private readonly IPEndPoint m_ServerEndPoint;
         private IPEndPoint m_PeerEndPoint;
 
         private bool m_IsUpload;
         private string m_Filename;
         private Stream m_Stream;
-        private Settings m_Settings;
+        private readonly Settings m_Settings;
         private TFTPPacket m_Request;
         private int m_BlockSize;
         private int m_Timeout;
@@ -62,7 +62,7 @@ namespace GitHub.JPMikkers.TFTP.Client
         private long m_Transferred;
         private long m_TransferSize;
         private long m_LastProgressTime;
-        private System.Diagnostics.Stopwatch m_ProgressStopwatch = new System.Diagnostics.Stopwatch();
+        private readonly System.Diagnostics.Stopwatch m_ProgressStopwatch = new System.Diagnostics.Stopwatch();
 
         const uint IOC_IN = 0x80000000;
         const uint IOC_VENDOR = 0x18000000;
@@ -70,7 +70,7 @@ namespace GitHub.JPMikkers.TFTP.Client
         internal const int MaxTFTPPacketSize = MaxBlockSize + 4;
 
         private Socket m_Socket;
-        private byte[] m_ReceiveBuffer;
+        private readonly byte[] m_ReceiveBuffer;
 
         /// <summary>
         /// During downloads, blocknumber is the number of the block that we expect to receive, and which we will ACK.

@@ -28,7 +28,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 {
     public class DelayedDisposer
     {
-        private Timer m_Timer;
+        private readonly Timer m_Timer;
 
         private DelayedDisposer(IDisposable obj, int timeOut)
         {
