@@ -28,17 +28,17 @@ namespace WinClient
 {
     public partial class FormSettings : Form
     {
-        private TFTPClientConfiguration m_Configuration;
+        private TFTPClientConfiguration _configuration;
 
         public TFTPClientConfiguration Configuration
         {
             get
             {
-                return m_Configuration.Clone();
+                return _configuration.Clone();
             }
             set
             {
-                m_Configuration = value.Clone();
+                _configuration = value.Clone();
                 Bind();
             }
         }
@@ -91,7 +91,7 @@ namespace WinClient
             textBoxTimeout.DataBindings.Clear();
             textBoxRetries.DataBindings.Clear();
             checkBoxDontFragment.DataBindings.Clear();
-            BindingSource bs = new BindingSource(m_Configuration, null);
+            BindingSource bs = new BindingSource(_configuration, null);
             textBoxBlockSize.DataBindings.Add("Text", bs, "BlockSize");
             checkBoxDontFragment.DataBindings.Add("Checked", bs, "DontFragment");
             textBoxTTL.DataBindings.Add("Text", bs, "Ttl");

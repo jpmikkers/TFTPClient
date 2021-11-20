@@ -28,23 +28,23 @@ namespace GitHub.JPMikkers.TFTP.Client
 {
     public class DelayedDisposer
     {
-        private readonly Timer m_Timer;
+        private readonly Timer _timer;
 
         private DelayedDisposer(IDisposable obj, int timeOut)
         {
-            m_Timer = new Timer(x =>
+            _timer = new Timer(x =>
             {
                 try
                 {
 
                     obj.Dispose();
-                    m_Timer.Dispose();
+                    _timer.Dispose();
                 }
                 catch
                 {
                 }
             });
-            m_Timer.Change(timeOut, Timeout.Infinite);
+            _timer.Change(timeOut, Timeout.Infinite);
         }
 
         public static void QueueDelayedDispose(IDisposable obj, int timeOut)
