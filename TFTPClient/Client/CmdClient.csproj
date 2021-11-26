@@ -3,7 +3,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>ClientTest</RootNamespace>
     <AssemblyName>TFTPClient</AssemblyName>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyTitle>TFTPClient</AssemblyTitle>
     <Company>JPMikkers</Company>
     <Product>TFTPClient</Product>
@@ -18,9 +18,6 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj" />

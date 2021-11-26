@@ -3,7 +3,7 @@
     <ProductVersion>9.0.30729</ProductVersion>
     <RootNamespace>GitHub.JPMikkers.TFTP.Client</RootNamespace>
     <AssemblyName>TFTPLibrary.Client</AssemblyName>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <AssemblyTitle>TFTPClientLibrary</AssemblyTitle>
