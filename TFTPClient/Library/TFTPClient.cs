@@ -244,7 +244,15 @@ namespace GitHub.JPMikkers.TFTP.Client
             if (!ipv6) _socket.DontFragment = settings.DontFragment;
             if (settings.Ttl >= 0) _socket.Ttl = settings.Ttl;
             _socket.Bind(new IPEndPoint(ipv6 ? IPAddress.IPv6Any : IPAddress.Any, 0));
-            _socket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
+
+            if (OperatingSystem.IsWindows())
+            {
+                // IOControl() is only available on windows. This call prevents the UDP socket from
+                // being closed as a result of ICMP Port Unreachable messages.
+                // see: https://stackoverflow.com/questions/15228272/what-would-cause-a-connectionreset-on-an-udp-socket
+                _socket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
+            }
+
             _socket.SendTimeout = 10000;
             _socket.ReceiveTimeout = 10000;
             _receiveBuffer = new byte[MaxTFTPPacketSize];
