@@ -27,6 +27,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace GitHub.JPMikkers.TFTP.Client
 {
@@ -100,26 +101,25 @@ namespace GitHub.JPMikkers.TFTP.Client
             }
         }
 
-        private void SendPacket(TFTPPacket msg)
+        private async Task SendPacket(TFTPPacket msg)
         {
             Trace(() => $"-> [{msg.EndPoint}] {msg.ToString()}");
             var ms = new MemoryStream();
             msg.Serialize(ms);
             byte[] buffer = ms.ToArray();
-            _socket.SendTo(buffer, 0, buffer.Length, SocketFlags.None, msg.EndPoint);
+            await _socket.SendToAsync(new ArraySegment<byte>(buffer), SocketFlags.None, msg.EndPoint);
         }
 
-        private TFTPPacket ReceivePacket(int timeout)
+        private async Task<TFTPPacket> ReceivePacket(int timeout)
         {
             if (timeout <= 0) return null;
 
             try
             {
                 _socket.ReceiveTimeout = timeout;
-                EndPoint responseEndPoint = new IPEndPoint(_serverEndPoint.Address, _serverEndPoint.Port);
-                int len = _socket.ReceiveFrom(_receiveBuffer, ref responseEndPoint);
-                var result = TFTPPacket.Deserialize(new MemoryStream(_receiveBuffer, 0, len, false, true));
-                result.EndPoint = (IPEndPoint)responseEndPoint;
+                var rp = await _socket.ReceiveFromAsync(new ArraySegment<byte>(_receiveBuffer), SocketFlags.None, new IPEndPoint(_serverEndPoint.Address, _serverEndPoint.Port));
+                var result = TFTPPacket.Deserialize(new MemoryStream(_receiveBuffer, 0, rp.ReceivedBytes, false, true));
+                result.EndPoint = (IPEndPoint)rp.RemoteEndPoint;
                 Trace(() => $"<- [{result.EndPoint}] {result.ToString()}");
                 return result;
             }
@@ -147,7 +147,7 @@ namespace GitHub.JPMikkers.TFTP.Client
         /// Done        : completed
         /// </summary>
         /// <param name="step">the packet interpretation function</param>
-        private void PumpPackets(Func<TFTPPacket, Instruction> step)
+        private async Task PumpPackets(Func<TFTPPacket, Instruction> step)
         {
             int retry = 0;
             var stopWatch = new System.Diagnostics.Stopwatch();
@@ -155,12 +155,12 @@ namespace GitHub.JPMikkers.TFTP.Client
 
             do
             {
-                SendPacket(_request);
+                await SendPacket(_request);
                 stopWatch.Restart();
 
                 do
                 {
-                    var response = ReceivePacket((int)Math.Max(0, (_timeout * 1000) - stopWatch.ElapsedMilliseconds));
+                    var response = await ReceivePacket((int)Math.Max(0, (_timeout * 1000) - stopWatch.ElapsedMilliseconds));
                     instruction = step(response);
                 } while (instruction == Instruction.Drop);
 
@@ -183,7 +183,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
             if (instruction == Instruction.SendFinal)
             {
-                SendPacket(_request);
+                await SendPacket(_request);
             }
         }
 
@@ -276,7 +276,7 @@ namespace GitHub.JPMikkers.TFTP.Client
             }
         }
 
-        public void Download(string filename, Stream stream)
+        public async Task DownloadAsync(string filename, Stream stream)
         {
             _isUpload = false;
             Init(filename, stream);
@@ -284,12 +284,12 @@ namespace GitHub.JPMikkers.TFTP.Client
             _blockNumber = 1;
             _request = new TFTPPacket_ReadRequest() { EndPoint = _serverEndPoint, Filename = filename, Options = _requestedOptions };
             Progress(true);
-            PumpPackets(p => FilterPacket(p, DoDownload));
+            await PumpPackets(p => FilterPacket(p, DoDownload));
             Progress(true);
             Trace(() => "Download complete");
         }
 
-        public void Upload(string filename, Stream stream)
+        public async Task UploadAsync(string filename, Stream stream)
         {
             _isUpload = true;
             Init(filename, stream);
@@ -315,9 +315,19 @@ namespace GitHub.JPMikkers.TFTP.Client
             _blockNumber = 0;
             _request = new TFTPPacket_WriteRequest() { EndPoint = _serverEndPoint, Filename = filename, Options = _requestedOptions };
             Progress(true);
-            PumpPackets(p => FilterPacket(p, DoUpload));
+            await PumpPackets(p => FilterPacket(p, DoUpload));
             Progress(true);
             Trace(() => "Upload complete");
+        }
+
+        public void Download(string filename, Stream stream)
+        {
+            Task.Run(async () => { await DownloadAsync(filename, stream); }).Wait();
+        }
+
+        public void Upload(string filename, Stream stream)
+        {
+            Task.Run(async () => { await UploadAsync(filename, stream); }).Wait();
         }
 
         private Instruction DoDownload(TFTPPacket packet)
@@ -517,6 +527,38 @@ namespace GitHub.JPMikkers.TFTP.Client
             var buf = new byte[len];
             int done = s.Read(buf, 0, len);
             return new ArraySegment<byte>(buf, 0, done);
+        }
+
+        public static async Task DownloadAsync(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
+        {
+            using (Stream localStream = File.Create(localFilename))
+            {
+                await DownloadAsync(serverEndPoint, localStream, remoteFilename, settings);
+            }
+        }
+
+        public static async Task DownloadAsync(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings = null)
+        {
+            using (var session = new TFTPClient(serverEndPoint, settings))
+            {
+                await session.DownloadAsync(remoteFilename, localStream);
+            }
+        }
+
+        public static async Task UploadAsync(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
+        {
+            using (Stream localStream = File.OpenRead(localFilename))
+            {
+                await UploadAsync(serverEndPoint, localStream, remoteFilename, settings);
+            }
+        }
+
+        public static async Task UploadAsync(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings = null)
+        {
+            using (var session = new TFTPClient(serverEndPoint, settings))
+            {
+                await session.UploadAsync(remoteFilename, localStream);
+            }
         }
 
         public static void Download(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
