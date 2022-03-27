@@ -1,6 +1,6 @@
 ﻿/*
 
-Copyright (c) 2013 Jean-Paul Mikkers
+Copyright (c) 2022 Jean-Paul Mikkers
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GitHub.JPMikkers.TFTP.Client
@@ -96,42 +97,43 @@ namespace GitHub.JPMikkers.TFTP.Client
                 if (force || (_progressStopwatch.ElapsedMilliseconds - _lastProgressTime) >= (long)_settings.ProgressInterval.TotalMilliseconds)
                 {
                     _lastProgressTime = _progressStopwatch.ElapsedMilliseconds;
-                    _settings.OnProgress(this, new ProgressEventArgs { Filename = _filename, IsUpload = _isUpload, Transferred = _transferred, TransferSize = _transferSize });
+                    _settings.OnProgress(this, new ProgressEventArgs { 
+                        Filename = _filename, 
+                        IsUpload = _isUpload, 
+                        Transferred = _transferred, 
+                        TransferSize = _transferSize 
+                    });
                 }
             }
         }
 
         private async Task SendPacket(TFTPPacket msg)
         {
-            Trace(() => $"-> [{msg.EndPoint}] {msg.ToString()}");
+            Trace(() => $"-> [{msg.EndPoint}] {msg}");
             var ms = new MemoryStream();
             msg.Serialize(ms);
             byte[] buffer = ms.ToArray();
             await _socket.SendToAsync(new ArraySegment<byte>(buffer), SocketFlags.None, msg.EndPoint);
         }
 
-        private async Task<TFTPPacket> ReceivePacket(int timeout)
+        private async Task<TFTPPacket> ReceivePacket(TimeSpan timeout)
         {
-            if (timeout <= 0) return null;
+            if (timeout.TotalMilliseconds <= 0) return null;
 
-            try
+            using (var timeoutCancellationTokenSource = new CancellationTokenSource(timeout))
             {
-                _socket.ReceiveTimeout = timeout;
-                var rp = await _socket.ReceiveFromAsync(new ArraySegment<byte>(_receiveBuffer), SocketFlags.None, new IPEndPoint(_serverEndPoint.Address, _serverEndPoint.Port));
-                var result = TFTPPacket.Deserialize(new MemoryStream(_receiveBuffer, 0, rp.ReceivedBytes, false, true));
-                result.EndPoint = (IPEndPoint)rp.RemoteEndPoint;
-                Trace(() => $"<- [{result.EndPoint}] {result.ToString()}");
-                return result;
-            }
-            catch (SocketException e)
-            {
-                if (e.SocketErrorCode == SocketError.TimedOut)
+                try
                 {
-                    return null;
+                    var rp = await _socket.ReceiveFromAsync(new Memory<byte>(_receiveBuffer), SocketFlags.None, new IPEndPoint(_serverEndPoint.Address, _serverEndPoint.Port), timeoutCancellationTokenSource.Token);
+                    var result = TFTPPacket.Deserialize(new MemoryStream(_receiveBuffer, 0, rp.ReceivedBytes, false, true));
+                    result.EndPoint = (IPEndPoint)rp.RemoteEndPoint;
+                    Trace(() => $"<- [{result.EndPoint}] {result}");
+                    return result;
                 }
-                else
+                catch (OperationCanceledException) when (timeoutCancellationTokenSource.IsCancellationRequested)
                 {
-                    throw;
+                    Trace(() => $"receive timeout");
+                    return null;
                 }
             }
         }
@@ -160,7 +162,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
                 do
                 {
-                    var response = await ReceivePacket((int)Math.Max(0, (_timeout * 1000) - stopWatch.ElapsedMilliseconds));
+                    var response = await ReceivePacket(TimeSpan.FromMilliseconds(Math.Max(0, (_timeout * 1000) - stopWatch.ElapsedMilliseconds)));
                     instruction = step(response);
                 } while (instruction == Instruction.Drop);
 
@@ -234,7 +236,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
         public TFTPClient(IPEndPoint serverEndPoint, Settings settings)
         {
-            settings = settings ?? new Settings();
+            settings ??= new Settings();
             _serverEndPoint = serverEndPoint;
             _settings = settings;
             _blockSize = DefaultBlockSize;
@@ -253,8 +255,8 @@ namespace GitHub.JPMikkers.TFTP.Client
                 _socket.IOControl((IOControlCode)SIO_UDP_CONNRESET, new byte[] { 0, 0, 0, 0 }, null);
             }
 
-            _socket.SendTimeout = 10000;
-            _socket.ReceiveTimeout = 10000;
+            _socket.SendTimeout = 10000;        // this only affects synchronous Send
+            _socket.ReceiveTimeout = 10000;     // this only affects synchronous Receive
             _receiveBuffer = new byte[MaxTFTPPacketSize];
         }
 
@@ -282,7 +284,11 @@ namespace GitHub.JPMikkers.TFTP.Client
             Init(filename, stream);
             _requestedOptions.Add(Option_TransferSize, "0");
             _blockNumber = 1;
-            _request = new TFTPPacket_ReadRequest() { EndPoint = _serverEndPoint, Filename = filename, Options = _requestedOptions };
+            _request = new TFTPPacket_ReadRequest { 
+                EndPoint = _serverEndPoint, 
+                Filename = filename, 
+                Options = _requestedOptions 
+            };
             Progress(true);
             await PumpPackets(p => FilterPacket(p, DoDownload));
             Progress(true);
@@ -313,7 +319,11 @@ namespace GitHub.JPMikkers.TFTP.Client
             }
 
             _blockNumber = 0;
-            _request = new TFTPPacket_WriteRequest() { EndPoint = _serverEndPoint, Filename = filename, Options = _requestedOptions };
+            _request = new TFTPPacket_WriteRequest { 
+                EndPoint = _serverEndPoint, 
+                Filename = filename, 
+                Options = _requestedOptions 
+            };
             Progress(true);
             await PumpPackets(p => FilterPacket(p, DoUpload));
             Progress(true);
@@ -342,7 +352,10 @@ namespace GitHub.JPMikkers.TFTP.Client
                         HandleOptionsAck((TFTPPacket_OptionsAck)packet);
                         // If the transfer was initiated with a Read Request, then an ACK (with the data block number set to 0) is sent by the client to confirm 
                         // the values in the server's OACK packet.
-                        _request = new TFTPPacket_Ack() { EndPoint = packet.EndPoint, BlockNumber = 0 };
+                        _request = new TFTPPacket_Ack { 
+                            EndPoint = packet.EndPoint, 
+                            BlockNumber = 0 
+                        };
                         result = Instruction.SendNew;
                         Progress(true);
                     }
@@ -359,7 +372,10 @@ namespace GitHub.JPMikkers.TFTP.Client
                         // did we receive the expected blocknumber ?
                         if (responseData.BlockNumber == _blockNumber)
                         {
-                            _request = new TFTPPacket_Ack { EndPoint = packet.EndPoint, BlockNumber = _blockNumber };
+                            _request = new TFTPPacket_Ack { 
+                                EndPoint = packet.EndPoint, 
+                                BlockNumber = _blockNumber 
+                            };
                             _stream.Write(responseData.Data.Array, responseData.Data.Offset, responseData.Data.Count);
                             _blockNumber++;
                             result = (responseData.Data.Count < _blockSize) ? Instruction.SendFinal : Instruction.SendNew;
@@ -398,7 +414,11 @@ namespace GitHub.JPMikkers.TFTP.Client
                         // If the transfer was initiated with a Write Request, then the client begins the transfer with the first DATA packet (blocknr=1), using the negotiated values.  
                         // If the client rejects the OACK, then it sends an ERROR packet, with error code 8, to the server and the transfer is terminated.
                         _blockNumber++;
-                        _request = new TFTPPacket_Data() { EndPoint = packet.EndPoint, BlockNumber = _blockNumber, Data = ReadData(_stream, _blockSize) };
+                        _request = new TFTPPacket_Data { 
+                            EndPoint = packet.EndPoint, 
+                            BlockNumber = _blockNumber, 
+                            Data = ReadData(_stream, _blockSize) 
+                        };
                         result = Instruction.SendNew;
                         _transferred += ((TFTPPacket_Data)_request).Data.Count;
                     }
@@ -426,7 +446,11 @@ namespace GitHub.JPMikkers.TFTP.Client
                             else
                             {
                                 _blockNumber++;
-                                _request = new TFTPPacket_Data() { EndPoint = packet.EndPoint, BlockNumber = _blockNumber, Data = ReadData(_stream, _blockSize) };
+                                _request = new TFTPPacket_Data { 
+                                    EndPoint = packet.EndPoint, 
+                                    BlockNumber = _blockNumber, 
+                                    Data = ReadData(_stream, _blockSize) 
+                                };
                                 result = Instruction.SendNew;
                                 _transferred += ((TFTPPacket_Data)_request).Data.Count;
                             }
@@ -531,7 +555,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
         public static async Task DownloadAsync(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
         {
-            using (Stream localStream = File.Create(localFilename))
+            using (var localStream = File.Create(localFilename))
             {
                 await DownloadAsync(serverEndPoint, localStream, remoteFilename, settings);
             }
@@ -547,7 +571,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
         public static async Task UploadAsync(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
         {
-            using (Stream localStream = File.OpenRead(localFilename))
+            using (var localStream = File.OpenRead(localFilename))
             {
                 await UploadAsync(serverEndPoint, localStream, remoteFilename, settings);
             }
@@ -563,7 +587,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
         public static void Download(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
         {
-            using (Stream localStream = File.Create(localFilename))
+            using (var localStream = File.Create(localFilename))
             {
                 Download(serverEndPoint, localStream, remoteFilename, settings);
             }
@@ -579,7 +603,7 @@ namespace GitHub.JPMikkers.TFTP.Client
 
         public static void Upload(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
         {
-            using (Stream localStream = File.OpenRead(localFilename))
+            using (var localStream = File.OpenRead(localFilename))
             {
                 Upload(serverEndPoint, localStream, remoteFilename, settings);
             }
