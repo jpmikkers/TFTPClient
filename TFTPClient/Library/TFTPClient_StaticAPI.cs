@@ -23,41 +23,42 @@ THE SOFTWARE.
 */
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace GitHub.JPMikkers.TFTP.Client
 {
     public partial class TFTPClient
     {
-        public static async Task DownloadAsync(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
+        public static async Task DownloadAsync(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null, CancellationToken cancellationToken = default)
         {
             using (var localStream = File.Create(localFilename))
             {
-                await DownloadAsync(serverEndPoint, localStream, remoteFilename, settings);
+                await DownloadAsync(serverEndPoint, localStream, remoteFilename, settings, cancellationToken);
             }
         }
 
-        public static async Task DownloadAsync(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings = null)
+        public static async Task DownloadAsync(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings = null, CancellationToken cancellationToken = default)
         {
             using (var session = new TFTPClient(serverEndPoint, settings))
             {
-                await session.DownloadAsync(remoteFilename, localStream);
+                await session.DownloadAsync(remoteFilename, localStream, cancellationToken);
             }
         }
 
-        public static async Task UploadAsync(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null)
+        public static async Task UploadAsync(IPEndPoint serverEndPoint, string localFilename, string remoteFilename, Settings settings = null, CancellationToken cancellationToken = default)
         {
             using (var localStream = File.OpenRead(localFilename))
             {
-                await UploadAsync(serverEndPoint, localStream, remoteFilename, settings);
+                await UploadAsync(serverEndPoint, localStream, remoteFilename, settings, cancellationToken);
             }
         }
 
-        public static async Task UploadAsync(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings = null)
+        public static async Task UploadAsync(IPEndPoint serverEndPoint, Stream localStream, string remoteFilename, Settings settings = null, CancellationToken cancellationToken = default)
         {
             using (var session = new TFTPClient(serverEndPoint, settings))
             {
-                await session.UploadAsync(remoteFilename, localStream);
+                await session.UploadAsync(remoteFilename, localStream, cancellationToken);
             }
         }
 

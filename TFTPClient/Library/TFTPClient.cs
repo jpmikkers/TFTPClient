@@ -29,6 +29,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace GitHub.JPMikkers.TFTP.Client
 {
@@ -60,11 +61,12 @@ namespace GitHub.JPMikkers.TFTP.Client
         private TFTPPacket _request;
         private int _blockSize;
         private int _timeout;
+        private CancellationToken _userCancellationToken;
 
         private long _transferred;
         private long _transferSize;
         private long _lastProgressTime;
-        private readonly System.Diagnostics.Stopwatch _progressStopwatch = new System.Diagnostics.Stopwatch();
+        private readonly Stopwatch _progressStopwatch = new();
 
         const uint IOC_IN = 0x80000000;
         const uint IOC_VENDOR = 0x18000000;
@@ -79,7 +81,7 @@ namespace GitHub.JPMikkers.TFTP.Client
         /// During uploads, blocknumber is the number of the block that we sent and expect an ACK for.
         /// </summary>
         private ushort _blockNumber;
-        private Dictionary<string, string> _requestedOptions = new Dictionary<string, string>();
+        private Dictionary<string, string> _requestedOptions = new();
         private bool _init;
 
         private void Trace(Func<string> constructMsg)
@@ -113,24 +115,25 @@ namespace GitHub.JPMikkers.TFTP.Client
             var ms = new MemoryStream();
             msg.Serialize(ms);
             byte[] buffer = ms.ToArray();
-            await _socket.SendToAsync(new ArraySegment<byte>(buffer), SocketFlags.None, msg.EndPoint);
+            await _socket.SendToAsync(new ReadOnlyMemory<byte>(buffer), SocketFlags.None, msg.EndPoint, _userCancellationToken);
         }
 
         private async Task<TFTPPacket> ReceivePacket(TimeSpan timeout)
         {
             if (timeout.TotalMilliseconds <= 0) return null;
 
-            using (var timeoutCancellationTokenSource = new CancellationTokenSource(timeout))
+            using (var timeoutCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_userCancellationToken))
             {
                 try
                 {
+                    timeoutCancellationTokenSource.CancelAfter(timeout);
                     var rp = await _socket.ReceiveFromAsync(new Memory<byte>(_receiveBuffer), SocketFlags.None, new IPEndPoint(_serverEndPoint.Address, _serverEndPoint.Port), timeoutCancellationTokenSource.Token);
                     var result = TFTPPacket.Deserialize(new MemoryStream(_receiveBuffer, 0, rp.ReceivedBytes, false, true));
                     result.EndPoint = (IPEndPoint)rp.RemoteEndPoint;
                     Trace(() => $"<- [{result.EndPoint}] {result}");
                     return result;
                 }
-                catch (OperationCanceledException) when (timeoutCancellationTokenSource.IsCancellationRequested)
+                catch (OperationCanceledException) when (timeoutCancellationTokenSource.IsCancellationRequested && !_userCancellationToken.IsCancellationRequested)
                 {
                     Trace(() => $"receive timeout");
                     return null;
@@ -278,12 +281,13 @@ namespace GitHub.JPMikkers.TFTP.Client
             }
         }
 
-        public async Task DownloadAsync(string filename, Stream stream)
+        public async Task DownloadAsync(string filename, Stream stream, CancellationToken cancellationToken = default)
         {
             _isUpload = false;
             Init(filename, stream);
             _requestedOptions.Add(Option_TransferSize, "0");
             _blockNumber = 1;
+            _userCancellationToken = cancellationToken;
             _request = new TFTPPacket_ReadRequest { 
                 EndPoint = _serverEndPoint, 
                 Filename = filename, 
@@ -295,7 +299,7 @@ namespace GitHub.JPMikkers.TFTP.Client
             Trace(() => "Download complete");
         }
 
-        public async Task UploadAsync(string filename, Stream stream)
+        public async Task UploadAsync(string filename, Stream stream, CancellationToken cancellationToken = default)
         {
             _isUpload = true;
             Init(filename, stream);
@@ -319,6 +323,7 @@ namespace GitHub.JPMikkers.TFTP.Client
             }
 
             _blockNumber = 0;
+            _userCancellationToken = cancellationToken;
             _request = new TFTPPacket_WriteRequest { 
                 EndPoint = _serverEndPoint, 
                 Filename = filename, 
