@@ -35,7 +35,7 @@ namespace Client
     {
         private static void OnProgress(object sender, TFTPClient.ProgressEventArgs args)
         {
-            Console.WriteLine("'{0}': {1} of {2}", args.Filename, args.Transferred, args.TransferSize >= 0 ? args.TransferSize.ToString() : "?");
+            Console.WriteLine($"'{args.Filename}': {args.Transferred} of {(args.TransferSize >= 0 ? args.TransferSize.ToString() : "?")}");
         }
 
         private static void OnTrace(object sender, TFTPClient.TraceEventArgs args)
@@ -136,7 +136,7 @@ namespace Client
 
                 if (serverAddress == null)
                 {
-                    Console.Error.WriteLine("Could not resolve '{0}' to an {1} address", remaining[0], ipv6 ? "ipv6" : "ipv4");
+                    Console.Error.WriteLine($"Could not resolve '{remaining[0]}' to an {(ipv6 ? "ipv6" : "ipv4")} address");
                     return 1;
                 }
 
@@ -163,13 +163,13 @@ namespace Client
                 }
                 catch (Exception e)
                 {
-                    Console.Error.WriteLine("Transfer failed: {0}", e.Message);
+                    Console.Error.WriteLine($"Transfer failed: {e.Message}");
                     return 1;
                 }
             }
             catch (Exception e)
             {
-                Console.Error.WriteLine("Error: {0}", e.Message);
+                Console.Error.WriteLine($"Error: {e.Message}");
                 return 1;
             }
         }
