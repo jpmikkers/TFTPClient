@@ -16,20 +16,6 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Update="FormMain.cs" />
-    <Compile Update="FormMain.Designer.cs">
-      <DependentUpon>FormMain.cs</DependentUpon>
-    </Compile>
-    <Compile Update="FormSettings.cs" />
-    <Compile Update="FormSettings.designer.cs">
-      <DependentUpon>FormSettings.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Update="FormMain.resx">
-      <DependentUpon>FormMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Update="FormSettings.resx">
-      <DependentUpon>FormSettings.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
