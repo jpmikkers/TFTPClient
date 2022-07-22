@@ -32,4 +32,8 @@ Here's the help page from the command line utility:
       --silent               don't show progress information
       --ttl=VALUE            set time to live
       -?, -h, --help         show help
- 
+
+Screenshot of TFTP Client desktop application:
+
+![image](./docs/TFTPClient_gui.png)
+
