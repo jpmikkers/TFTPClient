@@ -11,8 +11,6 @@ namespace WinClient
 {
     public partial class FormMain : Form
     {
-        private Task task;
-
         private TFTPClientConfiguration Configuration
         {
             get
@@ -31,7 +29,6 @@ namespace WinClient
                 }
             }
         }
-
 
         private bool IsDownload
         {
@@ -95,35 +92,12 @@ namespace WinClient
             settings.LocalFilename = this.textBoxLocalFilename.Text;
             Configuration = settings;
         }
-        /*
-                void textBoxServer_Validated(object sender, EventArgs e)
-                {
-                    this.errorProvider1.SetError(textBoxServer, "");
-                }
 
-                private void textBoxServer_Validating(object sender, CancelEventArgs e)
-                {
-                    ushort value;
-
-                    e.Cancel = true;
-
-                    if (ResolveServer(textBoxServer.Text) != null)
-                    {
-                        e.Cancel = false;
-                    }
-
-                    if (e.Cancel)
-                    {
-                        this.errorProvider1.SetError(textBoxServer, "Not a valid server address");
-                    }
-                }
-        */
-
-        private void button3_Click(object sender, EventArgs e)
+        private void Button3_Click(object sender, EventArgs e)
         {
             if (IsDownload)
             {
-                if (saveFileDialog1.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+                if (saveFileDialog1.ShowDialog(this) == DialogResult.OK)
                 {
                     textBoxLocalFilename.Text = saveFileDialog1.FileName;
                     UpdateAutoName();
@@ -131,7 +105,7 @@ namespace WinClient
             }
             else
             {
-                if (openFileDialog1.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+                if (openFileDialog1.ShowDialog(this) == DialogResult.OK)
                 {
                     textBoxLocalFilename.Text = openFileDialog1.FileName;
                     UpdateAutoName();
@@ -139,7 +113,7 @@ namespace WinClient
             }
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void CheckBox1_CheckedChanged(object sender, EventArgs e)
         {
             UpdateAutoNameState();
         }
@@ -169,80 +143,69 @@ namespace WinClient
             }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void TextBox1_TextChanged(object sender, EventArgs e)
         {
             UpdateAutoName();
         }
 
-        private void textBoxLocalFilename_TextChanged(object sender, EventArgs e)
+        private void TextBoxLocalFilename_TextChanged(object sender, EventArgs e)
         {
             UpdateAutoName();
         }
 
-        private void buttonStart_Click(object sender, EventArgs e)
+        private async void ButtonStart_Click(object sender, EventArgs e)
         {
             try
             {
-                if (task == null)
+                toolStripStatusLabel1.Text = "";
+
+                if (string.IsNullOrWhiteSpace(LocalFilename))
                 {
-                    toolStripStatusLabel1.Text = "";
+                    MessageBox.Show(this, "Please enter a valid local filename", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
-                    if (string.IsNullOrWhiteSpace(LocalFilename))
-                    {
-                        MessageBox.Show(this, "Please enter a valid local filename", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
+                if (string.IsNullOrWhiteSpace(RemoteFilename))
+                {
+                    MessageBox.Show(this, "Please enter a valid remote filename", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
-                    if (string.IsNullOrWhiteSpace(RemoteFilename))
-                    {
-                        MessageBox.Show(this, "Please enter a valid remote filename", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
+                var settings = new TFTPClient.Settings
+                {
+                    OnProgress = OnProgress,
+                    ProgressInterval = TimeSpan.FromMilliseconds(500),
+                    BlockSize = Configuration.BlockSize,
+                    DontFragment = Configuration.DontFragment,
+                    ResponseTimeout = TimeSpan.FromSeconds(Configuration.Timeout),
+                    Retries = Configuration.Retries,
+                    Ttl = (short)Configuration.Ttl
+                };
 
-                    var uiScheduler = TaskScheduler.FromCurrentSynchronizationContext();
-                    IPEndPoint endpoint = ResolveServer(textBoxServer.Text);
-                    string localFilename = LocalFilename;
-                    string remoteFilename = RemoteFilename;
-                    bool isDownload = IsDownload;
-                    var settings = new TFTPClient.Settings();
-                    settings.OnProgress = OnProgress;
-                    settings.ProgressInterval = TimeSpan.FromMilliseconds(200);
-                    settings.BlockSize = Configuration.BlockSize;
-                    settings.DontFragment = Configuration.DontFragment;
-                    settings.ResponseTimeout = TimeSpan.FromSeconds(Configuration.Timeout);
-                    settings.Retries = Configuration.Retries;
-                    settings.Ttl = (short)Configuration.Ttl;
-
+                try
+                {
                     panel1.Enabled = false;
+                    var endpoint = ResolveServer(textBoxServer.Text);
 
-                    task = Task.Factory.StartNew(
-                        () =>
-                        {
-                            if (isDownload)
-                            {
-                                TFTPClient.Download(endpoint, localFilename, remoteFilename, settings);
-                            }
-                            else
-                            {
-                                TFTPClient.Upload(endpoint, localFilename, remoteFilename, settings);
-                            }
-                        },
-                        TaskCreationOptions.LongRunning
-                    ).ContinueWith(
-                        t =>
-                        {
-                            if (t.Exception != null)
-                            {
-                                HandleException(t.Exception.InnerException);
-                            }
-                            panel1.Enabled = true;
-                            task = null;
-                        }
-                    , uiScheduler);
+                    if (IsDownload)
+                    {
+                        await TFTPClient.DownloadAsync(endpoint, LocalFilename, RemoteFilename, settings);
+                    }
+                    else
+                    {
+                        await TFTPClient.UploadAsync(endpoint, LocalFilename, RemoteFilename, settings);
+                    }
+
+                    toolStripStatusLabel1.Text = toolStripStatusLabel1.Text + " finished.";
+                }
+                finally
+                {
+                    panel1.Enabled = true;
                 }
             }
             catch (Exception ex)
             {
+                toolStripStatusLabel1.Text = $"Error: '{ex.Message}'";
                 MessageBox.Show(this, ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -260,12 +223,6 @@ namespace WinClient
             }
         }
 
-        private void HandleException(Exception e)
-        {
-            toolStripStatusLabel1.Text = $"Error: '{e.Message}'";
-            MessageBox.Show(this, e.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-        }
-
         /// <summary>
         /// Parses/resolves a string to an endpoint, supporting the following formats:
         /// x.x.x.x                 -> 127.0.0.1
@@ -280,11 +237,10 @@ namespace WinClient
         private static IPEndPoint ResolveServer(string server)
         {
             // nested functions are cool
-            Func<string, int, int> ParseIntDefault = (str, def) =>
+            static int ParseIntDefault(string str, int def)
             {
-                int val;
-                return int.TryParse(str, out val) ? val : def;
-            };
+                return int.TryParse(str, out int val) ? val : def;
+            }
 
             IPEndPoint result = null;
             IPAddress address;
@@ -336,13 +292,13 @@ namespace WinClient
             return result;
         }
 
-        private void buttonSettings_Click(object sender, EventArgs e)
+        private void ButtonSettings_Click(object sender, EventArgs e)
         {
             using (var settingsForm = new FormSettings())
             {
                 settingsForm.StartPosition = FormStartPosition.CenterParent;
                 settingsForm.Configuration = Configuration;
-                if (settingsForm.ShowDialog(this) == System.Windows.Forms.DialogResult.OK)
+                if (settingsForm.ShowDialog(this) == DialogResult.OK)
                 {
                     Configuration = settingsForm.Configuration;
                 }
