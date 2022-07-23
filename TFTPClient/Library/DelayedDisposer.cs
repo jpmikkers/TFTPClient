@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace GitHub.JPMikkers.TFTP.Client
 {
-    public class DelayedDisposer
+    internal class DelayedDisposer
     {
         private readonly Timer _timer;
 
