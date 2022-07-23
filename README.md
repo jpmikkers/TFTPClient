@@ -32,4 +32,12 @@ Here's the help page from the command line utility:
       --silent               don't show progress information
       --ttl=VALUE            set time to live
       -?, -h, --help         show help
- 
+
+Screenshot of TFTP Client desktop application:
+
+<!--- these don't size correctly ... boooh
+![image](./docs/TFTPClient_gui.png)
+<img src="./docs/TFTPClient_gui.png" width="866px" height="312px">
+--->
+
+<img src="./docs/TFTPClient_gui.png" width="60%" height="60%">
