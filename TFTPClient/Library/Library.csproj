@@ -9,7 +9,7 @@
     <AssemblyTitle>TFTPClientLibrary</AssemblyTitle>
     <Company>JPMikkers</Company>
     <Product>TFTPClientLibrary</Product>
-    <Copyright>Copyright © 2019 Jean-Paul Mikkers</Copyright>
+    <Copyright>Copyright © 2022 Jean-Paul Mikkers</Copyright>
     <OutputPath>bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

@@ -5,7 +5,7 @@
     <AssemblyTitle>WinClient</AssemblyTitle>
     <Company>JPMikkers</Company>
     <Product>WinClient</Product>
-    <Copyright>Copyright © 2019 Jean-Paul Mikkers</Copyright>
+    <Copyright>Copyright © 2022 Jean-Paul Mikkers</Copyright>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <UseWindowsForms>True</UseWindowsForms>
   </PropertyGroup>
