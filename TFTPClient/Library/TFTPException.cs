@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GitHub.JPMikkers.TFTP.Client
+namespace Baksteen.Net.TFTP.Client
 {
     [Serializable()]
     public class TFTPException : Exception

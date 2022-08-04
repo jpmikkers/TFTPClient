@@ -1,16 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <RootNamespace>GitHub.JPMikkers.TFTP.Client</RootNamespace>
-    <AssemblyName>TFTPLibrary.Client</AssemblyName>
-    <TargetFramework>net6.0</TargetFramework>
-    <FileUpgradeFlags />
-    <UpgradeBackupLocation />
-    <AssemblyTitle>TFTPClientLibrary</AssemblyTitle>
+    <RootNamespace>Baksteen.Net.TFTP.Client</RootNamespace>
+    <AssemblyName>Baksteen.Net.TFTP.Client</AssemblyName>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <AssemblyTitle>Baksteen TFTP Client Library</AssemblyTitle>
     <Company>JPMikkers</Company>
-    <Product>TFTPClientLibrary</Product>
-    <Copyright>Copyright © 2022 Jean-Paul Mikkers</Copyright>
+    <Product>Baksteen TFTP Client Library</Product>
     <OutputPath>bin\$(Configuration)\</OutputPath>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageTags>tftp;tftp-protocol;tftp-client;windows;linux</PackageTags>
+	<Version>1.0.0</Version>
+    <Authors>jpmikkers</Authors>
+    <Copyright>Copyright © 2022 Jean-Paul Mikkers</Copyright>
+	<Description>multiplatform trivial file transfer protocol (TFTP) client library</Description>
+	<RepositoryType>git</RepositoryType>
+	<RepositoryUrl>https://github.com/jpmikkers/TFTPClient.git</RepositoryUrl>
+	<PackageProjectUrl>https://github.com/jpmikkers/TFTPClient</PackageProjectUrl>
+	<PackageReleaseNotes>First release on nuget</PackageReleaseNotes>
+	<PackageReadmeFile>readme.md</PackageReadmeFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -18,4 +26,10 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="Docs\readme.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
 </Project>

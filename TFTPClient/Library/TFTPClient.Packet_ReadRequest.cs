@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace GitHub.JPMikkers.TFTP.Client
+namespace Baksteen.Net.TFTP.Client
 {
     public partial class TFTPClient : IDisposable
     {

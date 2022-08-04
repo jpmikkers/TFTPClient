@@ -3,7 +3,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace GitHub.JPMikkers.TFTP.Client
+namespace Baksteen.Net.TFTP.Client
 {
     public partial class TFTPClient
     {

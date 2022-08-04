@@ -1,4 +1,4 @@
-﻿using GitHub.JPMikkers.TFTP.Client;
+﻿using Baksteen.Net.TFTP.Client;
 using System;
 using System.IO;
 using System.Linq;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace GitHub.JPMikkers.TFTP.Client
+namespace Baksteen.Net.TFTP.Client
 {
     internal class DelayedDisposer
     {

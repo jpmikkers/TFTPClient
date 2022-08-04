@@ -1,5 +1,5 @@
 ﻿
-using GitHub.JPMikkers.TFTP.Client;
+using Baksteen.Net.TFTP.Client;
 using Mono.Options;
 using System;
 using System.Linq;
