@@ -41,3 +41,7 @@ Screenshot of TFTP Client desktop application:
 --->
 
 <img src="./docs/TFTPClient_gui.png" width="60%" height="60%">
+
+I'm also working on a cross platform desktop UI client, using Avalonia (tested on Win11 and Linux). It's in a separate repository located here: [https://github.com/jpmikkers/Avalonia-TFTPClient](https://github.com/jpmikkers/Avalonia-TFTPClient)
+
+<img src="https://github.com/jpmikkers/Avalonia-TFTPClient/raw/main/Docs/Screenshot-win11.png" width="50%" height="50%">
