@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>Baksteen.Net.TFTP.Client</RootNamespace>
     <AssemblyName>Baksteen.Net.TFTP.Client</AssemblyName>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <AssemblyTitle>Baksteen TFTP Client Library</AssemblyTitle>
     <Company>JPMikkers</Company>
     <Product>Baksteen TFTP Client Library</Product>
@@ -10,14 +10,14 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageTags>tftp;tftp-protocol;tftp-client;windows;linux</PackageTags>
-	<Version>1.0.0</Version>
+	<Version>1.1.0</Version>
     <Authors>jpmikkers</Authors>
-    <Copyright>Copyright © 2022 Jean-Paul Mikkers</Copyright>
+    <Copyright>Copyright © 2025 Jean-Paul Mikkers</Copyright>
 	<Description>multiplatform trivial file transfer protocol (TFTP) client library</Description>
 	<RepositoryType>git</RepositoryType>
 	<RepositoryUrl>https://github.com/jpmikkers/TFTPClient.git</RepositoryUrl>
 	<PackageProjectUrl>https://github.com/jpmikkers/TFTPClient</PackageProjectUrl>
-	<PackageReleaseNotes>First release on nuget</PackageReleaseNotes>
+	<PackageReleaseNotes>Target net8</PackageReleaseNotes>
 	<PackageReadmeFile>readme.md</PackageReadmeFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

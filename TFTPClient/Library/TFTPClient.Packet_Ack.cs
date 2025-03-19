@@ -1,38 +1,37 @@
 ﻿using System;
 using System.IO;
 
-namespace Baksteen.Net.TFTP.Client
+namespace Baksteen.Net.TFTP.Client;
+
+public partial class TFTPClient : IDisposable
 {
-    public partial class TFTPClient : IDisposable
+    private class TFTPPacket_Ack : TFTPPacket
     {
-        private class TFTPPacket_Ack : TFTPPacket
+        public ushort BlockNumber { get; set; }
+
+        public TFTPPacket_Ack()
+            : base()
         {
-            public ushort BlockNumber { get; set; }
+            Code = Opcode.Ack;
+            BlockNumber = 0;
+        }
 
-            public TFTPPacket_Ack()
-                : base()
-            {
-                Code = Opcode.Ack;
-                BlockNumber = 0;
-            }
+        public TFTPPacket_Ack(Stream s)
+            : this()
+        {
+            ValidateCode(s);
+            BlockNumber = ReadUInt16(s);
+        }
 
-            public TFTPPacket_Ack(Stream s)
-                : this()
-            {
-                ValidateCode(s);
-                BlockNumber = ReadUInt16(s);
-            }
+        public override void Serialize(Stream s)
+        {
+            base.Serialize(s);
+            WriteUInt16(s, BlockNumber);
+        }
 
-            public override void Serialize(Stream s)
-            {
-                base.Serialize(s);
-                WriteUInt16(s, BlockNumber);
-            }
-
-            public override string ToString()
-            {
-                return $"{Code}( BlockNumber={BlockNumber} )";
-            }
+        public override string ToString()
+        {
+            return $"{Code}( BlockNumber={BlockNumber} )";
         }
     }
 }

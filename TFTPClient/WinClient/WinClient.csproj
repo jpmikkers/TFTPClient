@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <AssemblyTitle>WinClient</AssemblyTitle>
     <Company>JPMikkers</Company>
     <Product>WinClient</Product>
-    <Copyright>Copyright © 2022 Jean-Paul Mikkers</Copyright>
+    <Copyright>Copyright © 2025 Jean-Paul Mikkers</Copyright>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <UseWindowsForms>True</UseWindowsForms>
   </PropertyGroup>

@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Library", "Library\Library.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CmdClient", "Client\CmdClient.csproj", "{577F71FE-F14F-4480-9CD4-E5236F7957B4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinClient", "WinClient\WinClient.csproj", "{D82C743E-31B0-44A5-AEC0-8F7B1648799C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{577F71FE-F14F-4480-9CD4-E5236F7957B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{577F71FE-F14F-4480-9CD4-E5236F7957B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{577F71FE-F14F-4480-9CD4-E5236F7957B4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D82C743E-31B0-44A5-AEC0-8F7B1648799C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D82C743E-31B0-44A5-AEC0-8F7B1648799C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D82C743E-31B0-44A5-AEC0-8F7B1648799C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D82C743E-31B0-44A5-AEC0-8F7B1648799C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

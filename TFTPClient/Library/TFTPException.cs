@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace Baksteen.Net.TFTP.Client
+namespace Baksteen.Net.TFTP.Client;
+
+[Serializable()]
+public class TFTPException : Exception
 {
-    [Serializable()]
-    public class TFTPException : Exception
-    {
-        public TFTPException() : base() { }
-        public TFTPException(string message) : base(message) { }
-        public TFTPException(string message, System.Exception inner) : base(message, inner) { }
-        protected TFTPException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-    }
+    public TFTPException() : base() { }
+    public TFTPException(string message) : base(message) { }
+    public TFTPException(string message, System.Exception inner) : base(message, inner) { }
+    protected TFTPException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
 }
