@@ -10,26 +10,6 @@ namespace Baksteen.Net.TFTP.Client;
 public partial class TFTPClient : IDisposable
 {
     /// <summary>
-    /// Generic clip method
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="value">input value</param>
-    /// <param name="minValue">minimum value to clip to</param>
-    /// <param name="maxValue">maximum value to clip to</param>
-    /// <returns></returns>
-    private static T Clip<T>(T value, T minValue, T maxValue) where T : IComparable<T>
-    {
-        T result;
-        if (value.CompareTo(minValue) < 0)
-            result = minValue;
-        else if (value.CompareTo(maxValue) > 0)
-            result = maxValue;
-        else
-            result = value;
-        return result;
-    }
-
-    /// <summary>
     /// Converts a string key/value dictionary into a pretty printed string. Example:
     /// 'key1'='value1', 'key2'='value2' ...
     /// </summary>

@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
 
 namespace Baksteen.Net.TFTP.Client;
 
@@ -76,11 +76,12 @@ public partial class TFTPClient : IDisposable
             if (force || (_progressStopwatch.ElapsedMilliseconds - _lastProgressTime) >= (long)_settings.ProgressInterval.TotalMilliseconds)
             {
                 _lastProgressTime = _progressStopwatch.ElapsedMilliseconds;
-                _settings.OnProgress(this, new ProgressEventArgs { 
-                    Filename = _filename, 
-                    IsUpload = _isUpload, 
-                    Transferred = _transferred, 
-                    TransferSize = _transferSize 
+                _settings.OnProgress(this, new ProgressEventArgs
+                {
+                    Filename = _filename,
+                    IsUpload = _isUpload,
+                    Transferred = _transferred,
+                    TransferSize = _transferSize
                 });
             }
         }
@@ -265,10 +266,11 @@ public partial class TFTPClient : IDisposable
         _requestedOptions.Add(Option_TransferSize, "0");
         _blockNumber = 1;
         _userCancellationToken = cancellationToken;
-        _request = new TFTPPacket_ReadRequest { 
-            EndPoint = _serverEndPoint, 
-            Filename = filename, 
-            Options = _requestedOptions 
+        _request = new TFTPPacket_ReadRequest
+        {
+            EndPoint = _serverEndPoint,
+            Filename = filename,
+            Options = _requestedOptions
         };
         Progress(true);
         await PumpPackets(p => FilterPacket(p, DoDownload));
@@ -301,10 +303,11 @@ public partial class TFTPClient : IDisposable
 
         _blockNumber = 0;
         _userCancellationToken = cancellationToken;
-        _request = new TFTPPacket_WriteRequest { 
-            EndPoint = _serverEndPoint, 
-            Filename = filename, 
-            Options = _requestedOptions 
+        _request = new TFTPPacket_WriteRequest
+        {
+            EndPoint = _serverEndPoint,
+            Filename = filename,
+            Options = _requestedOptions
         };
         Progress(true);
         await PumpPackets(p => FilterPacket(p, DoUpload));
@@ -334,9 +337,10 @@ public partial class TFTPClient : IDisposable
                     HandleOptionsAck((TFTPPacket_OptionsAck)packet);
                     // If the transfer was initiated with a Read Request, then an ACK (with the data block number set to 0) is sent by the client to confirm 
                     // the values in the server's OACK packet.
-                    _request = new TFTPPacket_Ack { 
-                        EndPoint = packet.EndPoint, 
-                        BlockNumber = 0 
+                    _request = new TFTPPacket_Ack
+                    {
+                        EndPoint = packet.EndPoint,
+                        BlockNumber = 0
                     };
                     result = Instruction.SendNew;
                     Progress(true);
@@ -354,9 +358,10 @@ public partial class TFTPClient : IDisposable
                     // did we receive the expected blocknumber ?
                     if (responseData.BlockNumber == _blockNumber)
                     {
-                        _request = new TFTPPacket_Ack { 
-                            EndPoint = packet.EndPoint, 
-                            BlockNumber = _blockNumber 
+                        _request = new TFTPPacket_Ack
+                        {
+                            EndPoint = packet.EndPoint,
+                            BlockNumber = _blockNumber
                         };
                         _stream.Write(responseData.Data.Array, responseData.Data.Offset, responseData.Data.Count);
                         _blockNumber++;
@@ -396,10 +401,11 @@ public partial class TFTPClient : IDisposable
                     // If the transfer was initiated with a Write Request, then the client begins the transfer with the first DATA packet (blocknr=1), using the negotiated values.  
                     // If the client rejects the OACK, then it sends an ERROR packet, with error code 8, to the server and the transfer is terminated.
                     _blockNumber++;
-                    _request = new TFTPPacket_Data { 
-                        EndPoint = packet.EndPoint, 
-                        BlockNumber = _blockNumber, 
-                        Data = ReadData(_stream, _blockSize) 
+                    _request = new TFTPPacket_Data
+                    {
+                        EndPoint = packet.EndPoint,
+                        BlockNumber = _blockNumber,
+                        Data = ReadData(_stream, _blockSize)
                     };
                     result = Instruction.SendNew;
                     _transferred += ((TFTPPacket_Data)_request).Data.Count;
@@ -428,10 +434,11 @@ public partial class TFTPClient : IDisposable
                         else
                         {
                             _blockNumber++;
-                            _request = new TFTPPacket_Data { 
-                                EndPoint = packet.EndPoint, 
-                                BlockNumber = _blockNumber, 
-                                Data = ReadData(_stream, _blockSize) 
+                            _request = new TFTPPacket_Data
+                            {
+                                EndPoint = packet.EndPoint,
+                                BlockNumber = _blockNumber,
+                                Data = ReadData(_stream, _blockSize)
                             };
                             result = Instruction.SendNew;
                             _transferred += ((TFTPPacket_Data)_request).Data.Count;
@@ -467,10 +474,10 @@ public partial class TFTPClient : IDisposable
         if (_settings.BlockSize != DefaultBlockSize)
         {
             // limit blocksize to allowed range
-            _requestedOptions.Add(Option_BlockSize, Clip(_settings.BlockSize, MinBlockSize, MaxBlockSize).ToString());
+            _requestedOptions.Add(Option_BlockSize, Math.Clamp(_settings.BlockSize, MinBlockSize, MaxBlockSize).ToString());
         }
 
-        _requestedOptions.Add(Option_Timeout, Clip(_timeout, 1, 255).ToString());
+        _requestedOptions.Add(Option_Timeout, Math.Clamp(_timeout, 1, 255).ToString());
 
         _lastProgressTime = 0;
         _transferred = 0;
