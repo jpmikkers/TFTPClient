@@ -54,13 +54,13 @@ public partial class TFTPClient : IDisposable
     #region packet serialization/deserialization
     internal static ushort ReadUInt16(Stream s)
     {
-        var br = new BinaryReader(s);
+        using var br = new BinaryReader(s, Encoding.ASCII, leaveOpen: true);
         return (ushort)IPAddress.NetworkToHostOrder((short)br.ReadUInt16());
     }
 
     internal static void WriteUInt16(Stream s, ushort v)
     {
-        var bw = new BinaryWriter(s);
+        using var bw = new BinaryWriter(s, Encoding.ASCII, leaveOpen: true);
         bw.Write((ushort)IPAddress.HostToNetworkOrder((short)v));
     }
 
@@ -99,7 +99,7 @@ public partial class TFTPClient : IDisposable
 
     internal static void WriteZString(Stream s, string msg)
     {
-        var tw = new StreamWriter(s, Encoding.ASCII);
+        using var tw = new StreamWriter(s, Encoding.ASCII, leaveOpen: true);
         tw.Write(msg);
         tw.Flush();
         s.WriteByte(0);
