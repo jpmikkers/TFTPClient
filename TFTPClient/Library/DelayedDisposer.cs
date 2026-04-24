@@ -15,7 +15,7 @@ internal class DelayedDisposer
             {
 
                 obj.Dispose();
-                _timer.Dispose();
+                _timer!.Dispose();
             }
             catch
             {
@@ -26,6 +26,6 @@ internal class DelayedDisposer
 
     public static void QueueDelayedDispose(IDisposable obj, int timeOut)
     {
-        new DelayedDisposer(obj, timeOut);
+        _ = new DelayedDisposer(obj, timeOut);
     }
 }

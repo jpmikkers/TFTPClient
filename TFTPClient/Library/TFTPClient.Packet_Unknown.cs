@@ -20,13 +20,16 @@ public partial class TFTPClient : IDisposable
             : this()
         {
             var data = new byte[s.Length];
-            s.Read(data, 0, data.Length);
+            s.ReadExactly(data, 0, data.Length);
             Data = new ArraySegment<byte>(data);
         }
 
         public override void Serialize(Stream s)
         {
-            s.Write(Data.Array, Data.Offset, Data.Count);
+            if (Data.Array != null)
+            {
+                s.Write(Data.Array, Data.Offset, Data.Count);
+            }
         }
 
         public override string ToString()

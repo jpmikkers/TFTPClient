@@ -33,10 +33,13 @@ public partial class TFTPClient : IDisposable
         var sb = new StringBuilder();
         limit = Math.Min(data.Count, limit);
 
-        for (int t = 0; t < limit; t++)
+        if (data.Array != null)
         {
-            sb.Append(data.Array[data.Offset + t].ToString("X2"));
-            sb.Append(separator);
+            for (var t = 0; t < limit; t++)
+            {
+                sb.Append(data.Array[data.Offset + t].ToString("X2"));
+                sb.Append(separator);
+            }
         }
 
         if (data.Count > limit)

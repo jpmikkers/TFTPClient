@@ -11,29 +11,34 @@ namespace Client;
 
 class Program
 {
-    private static void OnProgress(object sender, TFTPClient.ProgressEventArgs args)
+    private static void OnProgress(object? sender, TFTPClient.ProgressEventArgs args)
     {
         Console.WriteLine($"'{args.Filename}': {args.Transferred} of {(args.TransferSize >= 0 ? args.TransferSize.ToString() : "?")}");
     }
 
-    private static void OnTrace(object sender, TFTPClient.TraceEventArgs args)
+    private static void OnTrace(object? sender, TFTPClient.TraceEventArgs args)
     {
         Console.WriteLine(args.Message);
+    }
+
+    private static Version GetVersion()
+    {
+        return Assembly.GetExecutingAssembly().GetName().Version ?? new Version(0, 0, 0);
     }
 
     static int Main(string[] args)
     {
         try
         {
-            string localFilename = null;
-            string remoteFilename = null;
+            string? localFilename = null;
+            string? remoteFilename = null;
             bool isGet = false;
             bool isPut = false;
             bool ipv6 = false;
             int serverPort = 69;
             bool showHelp = false;
             bool silent = false;
-            IPAddress serverAddress = null;
+            IPAddress? serverAddress = null;
 
             var settings = new TFTPClient.Settings()
             {
@@ -44,7 +49,7 @@ class Program
             var optionSet = new OptionSet
             {
                 "",
-                $"TFTPClient {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}",
+                $"TFTPClient {GetVersion().ToString(3)}",
                 "Transfers files to and from a remote computer running the TFTP service.",
                 "",
                 "Usage: TFTPClient [options]+ host[:port]",

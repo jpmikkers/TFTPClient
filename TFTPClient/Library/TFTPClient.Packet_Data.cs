@@ -31,7 +31,10 @@ public partial class TFTPClient : IDisposable
         {
             base.Serialize(s);
             WriteUInt16(s, BlockNumber);
-            s.Write(Data.Array, Data.Offset, Data.Count);
+            if (Data.Array != null)
+            {
+                s.Write(Data.Array, Data.Offset, Data.Count);
+            }
         }
 
         public override string ToString()

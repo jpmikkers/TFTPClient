@@ -19,6 +19,7 @@
 	<PackageProjectUrl>https://github.com/jpmikkers/TFTPClient</PackageProjectUrl>
     <PackageReleaseNotes>Target net10</PackageReleaseNotes>
 	<PackageReadmeFile>readme.md</PackageReadmeFile>
+	<Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>

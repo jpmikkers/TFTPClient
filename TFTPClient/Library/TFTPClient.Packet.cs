@@ -46,7 +46,7 @@ public partial class TFTPClient : IDisposable
         {
             get;
             set;
-        }
+        } = new IPEndPoint(IPAddress.None, 0);
 
         public virtual void Serialize(Stream s)
         {
@@ -60,7 +60,7 @@ public partial class TFTPClient : IDisposable
 
         public static TFTPPacket Deserialize(Stream s)
         {
-            TFTPPacket result = null;
+            TFTPPacket result;
 
             long startPosition = s.Position;
             Opcode c = (Opcode)ReadUInt16(s);
