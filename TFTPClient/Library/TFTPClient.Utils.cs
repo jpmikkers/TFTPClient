@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 
 namespace Baksteen.Net.TFTP.Client;
@@ -55,57 +55,58 @@ public partial class TFTPClient : IDisposable
     }
 
     #region packet serialization/deserialization
-    internal static ushort ReadUInt16(Stream s)
+    internal static ushort ReadUInt16(Stream stream)
     {
-        using var br = new BinaryReader(s, Encoding.ASCII, leaveOpen: true);
-        return (ushort)IPAddress.NetworkToHostOrder((short)br.ReadUInt16());
+        Span<byte> buf = stackalloc byte[sizeof(ushort)];
+        stream.ReadExactly(buf);
+        return BinaryPrimitives.ReadUInt16BigEndian(buf);
     }
 
-    internal static void WriteUInt16(Stream s, ushort v)
+    internal static void WriteUInt16(Stream stream, ushort value)
     {
-        using var bw = new BinaryWriter(s, Encoding.ASCII, leaveOpen: true);
-        bw.Write((ushort)IPAddress.HostToNetworkOrder((short)v));
+        Span<byte> buffer = stackalloc byte[sizeof(ushort)];
+        BinaryPrimitives.WriteUInt16BigEndian(buffer, value);
+        stream.Write(buffer);
     }
 
-    internal static Dictionary<string, string> ReadOptions(Stream s)
+    internal static Dictionary<string, string> ReadOptions(Stream stream)
     {
         var options = new Dictionary<string, string>();
-        while (s.Position < s.Length)
+        while (stream.Position < stream.Length)
         {
-            string key = ReadZString(s).ToLower();
-            string val = ReadZString(s).ToLower();
+            string key = ReadZString(stream).ToLower();
+            string val = ReadZString(stream).ToLower();
             options.Add(key, val);
         }
         return options;
     }
 
-    internal static void WriteOptions(Stream s, Dictionary<string, string> options)
+    internal static void WriteOptions(Stream stream, Dictionary<string, string> options)
     {
         foreach (var option in options)
         {
-            WriteZString(s, option.Key);
-            WriteZString(s, option.Value);
+            WriteZString(stream, option.Key);
+            WriteZString(stream, option.Value);
         }
     }
 
-    internal static string ReadZString(Stream s)
+    internal static string ReadZString(Stream stream)
     {
         var sb = new StringBuilder();
-        int c = s.ReadByte();
+        int c = stream.ReadByte();
         while (c > 0)
         {
             sb.Append((char)c);
-            c = s.ReadByte();
+            c = stream.ReadByte();
         }
         return sb.ToString();
     }
 
-    internal static void WriteZString(Stream s, string msg)
+    internal static void WriteZString(Stream stream, string msg)
     {
-        using var tw = new StreamWriter(s, Encoding.ASCII, leaveOpen: true);
-        tw.Write(msg);
-        tw.Flush();
-        s.WriteByte(0);
+        var buf = Encoding.ASCII.GetBytes(msg);
+        stream.Write(buf);
+        stream.WriteByte(0);
     }
     #endregion
 }
