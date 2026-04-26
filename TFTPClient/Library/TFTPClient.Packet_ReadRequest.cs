@@ -13,13 +13,18 @@ public partial class TFTPClient : IDisposable
             Code = Opcode.ReadRequest;
         }
 
-        public TFTPPacket_ReadRequest(Stream s)
+        private TFTPPacket_ReadRequest(Stream s)
             : this()
         {
             ValidateCode(s);
             Filename = ReadZString(s);
             Mode = ReadZString(s);
             Options = ReadOptions(s);
+        }
+
+        public static new TFTPPacket_ReadRequest Deserialize(Stream s)
+        {
+            return new TFTPPacket_ReadRequest(s);
         }
     }
 }

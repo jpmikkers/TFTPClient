@@ -16,11 +16,16 @@ public partial class TFTPClient : IDisposable
             BlockNumber = 0;
         }
 
-        public TFTPPacket_Ack(Stream s)
+        private TFTPPacket_Ack(Stream s)
             : this()
         {
             ValidateCode(s);
             BlockNumber = ReadUInt16(s);
+        }
+
+        public static new TFTPPacket_Ack Deserialize(Stream s)
+        {
+            return new TFTPPacket_Ack(s);
         }
 
         public override void Serialize(Stream s)

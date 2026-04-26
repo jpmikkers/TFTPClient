@@ -16,12 +16,17 @@ public partial class TFTPClient : IDisposable
             Data = new ArraySegment<byte>();
         }
 
-        public TFTPPacket_Unknown(Stream s)
+        private TFTPPacket_Unknown(Stream s)
             : this()
         {
             var data = new byte[s.Length];
             s.ReadExactly(data, 0, data.Length);
             Data = new ArraySegment<byte>(data);
+        }
+
+        public static new TFTPPacket_Unknown Deserialize(Stream s)
+        {
+            return new TFTPPacket_Unknown(s);
         }
 
         public override void Serialize(Stream s)

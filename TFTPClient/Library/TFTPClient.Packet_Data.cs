@@ -17,7 +17,7 @@ public partial class TFTPClient : IDisposable
             Data = new ArraySegment<byte>();
         }
 
-        public TFTPPacket_Data(Stream s)
+        private TFTPPacket_Data(Stream s)
             : this()
         {
             ValidateCode(s);
@@ -25,6 +25,11 @@ public partial class TFTPClient : IDisposable
             byte[] data = new byte[s.Length - s.Position];
             int bytesRead = s.Read(data, 0, data.Length);
             Data = new ArraySegment<byte>(data);
+        }
+
+        public static new TFTPPacket_Data Deserialize(Stream s)
+        {
+            return new TFTPPacket_Data(s);
         }
 
         public override void Serialize(Stream s)

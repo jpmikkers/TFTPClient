@@ -69,31 +69,31 @@ public partial class TFTPClient : IDisposable
             switch (c)
             {
                 case Opcode.Ack:
-                    result = new TFTPPacket_Ack(s);
+                    result = TFTPPacket_Ack.Deserialize(s);
                     break;
 
                 case Opcode.Data:
-                    result = new TFTPPacket_Data(s);
+                    result = TFTPPacket_Data.Deserialize(s);
                     break;
 
                 case Opcode.Error:
-                    result = new TFTPPacket_Error(s);
+                    result = TFTPPacket_Error.Deserialize(s);
                     break;
 
                 case Opcode.OptionsAck:
-                    result = new TFTPPacket_OptionsAck(s);
+                    result = TFTPPacket_OptionsAck.Deserialize(s);
                     break;
 
                 case Opcode.ReadRequest:
-                    result = new TFTPPacket_ReadRequest(s);
+                    result = TFTPPacket_ReadRequest.Deserialize(s);
                     break;
 
                 case Opcode.WriteRequest:
-                    result = new TFTPPacket_WriteRequest(s);
+                    result = TFTPPacket_WriteRequest.Deserialize(s);
                     break;
 
                 default:
-                    result = new TFTPPacket_Unknown(s);
+                    result = TFTPPacket_Unknown.Deserialize(s);
                     break;
             }
 
