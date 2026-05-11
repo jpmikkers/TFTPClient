@@ -74,8 +74,8 @@ public partial class TFTPClient : IDisposable
         var options = new Dictionary<string, string>();
         while (stream.Position < stream.Length)
         {
-            string key = ReadZString(stream).ToLower();
-            string val = ReadZString(stream).ToLower();
+            var key = ReadZString(stream).ToLower();
+            var val = ReadZString(stream).ToLower();
             options.Add(key, val);
         }
         return options;
@@ -93,7 +93,7 @@ public partial class TFTPClient : IDisposable
     internal static string ReadZString(Stream stream)
     {
         var sb = new StringBuilder();
-        int c = stream.ReadByte();
+        var c = stream.ReadByte();
         while (c > 0)
         {
             sb.Append((char)c);

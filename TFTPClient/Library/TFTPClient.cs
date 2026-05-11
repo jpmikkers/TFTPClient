@@ -59,7 +59,7 @@ public partial class TFTPClient : IDisposable
     /// During uploads, blocknumber is the number of the block that we sent and expect an ACK for.
     /// </summary>
     private ushort _blockNumber;
-    private Dictionary<string, string> _requestedOptions = new();
+    private Dictionary<string, string> _requestedOptions = [];
     private bool _init;
 
     private void Trace(Func<string> constructMsg)

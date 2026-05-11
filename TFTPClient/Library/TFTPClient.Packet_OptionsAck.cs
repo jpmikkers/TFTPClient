@@ -14,7 +14,7 @@ public partial class TFTPClient : IDisposable
             : base()
         {
             Code = Opcode.OptionsAck;
-            Options = new Dictionary<string, string>();
+            Options = [];
         }
 
         private TFTPPacket_OptionsAck(Stream s)
