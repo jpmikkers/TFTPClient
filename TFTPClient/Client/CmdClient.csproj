@@ -3,12 +3,13 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>ClientTest</RootNamespace>
     <AssemblyName>TFTPClient</AssemblyName>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AssemblyTitle>TFTPClient</AssemblyTitle>
     <Company>JPMikkers</Company>
     <Product>TFTPClient</Product>
     <Copyright>Copyright © 2025 Jean-Paul Mikkers</Copyright>
     <OutputPath>bin\$(Configuration)\</OutputPath>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>full</DebugType>

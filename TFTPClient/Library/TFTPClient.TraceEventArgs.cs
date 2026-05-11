@@ -6,6 +6,6 @@ public partial class TFTPClient
 {
     public class TraceEventArgs : EventArgs
     {
-        public string Message { get; set; }
+        public string Message { get; set; } = string.Empty;
     }
 }

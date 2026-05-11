@@ -14,14 +14,19 @@ public partial class TFTPClient : IDisposable
             : base()
         {
             Code = Opcode.OptionsAck;
-            Options = new Dictionary<string, string>();
+            Options = [];
         }
 
-        public TFTPPacket_OptionsAck(Stream s)
+        private TFTPPacket_OptionsAck(Stream s)
             : this()
         {
             ValidateCode(s);
             Options = ReadOptions(s);
+        }
+
+        public static new TFTPPacket_OptionsAck Deserialize(Stream s)
+        {
+            return new TFTPPacket_OptionsAck(s);
         }
 
         public override void Serialize(Stream s)

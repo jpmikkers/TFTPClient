@@ -12,8 +12,8 @@ public partial class TFTPClient : IDisposable
         public TimeSpan ResponseTimeout { get; set; }
         public int Retries { get; set; }
         public TimeSpan ProgressInterval { get; set; }
-        public EventHandler<TraceEventArgs> OnTrace;
-        public EventHandler<ProgressEventArgs> OnProgress;
+        public EventHandler<TraceEventArgs>? OnTrace;
+        public EventHandler<ProgressEventArgs>? OnProgress;
 
         public Settings()
         {

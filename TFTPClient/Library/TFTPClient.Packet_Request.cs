@@ -17,7 +17,7 @@ public partial class TFTPClient : IDisposable
             Code = Opcode.Unknown;
             Filename = "";
             Mode = "octet";
-            Options = new Dictionary<string, string>();
+            Options = [];
         }
 
         public override void Serialize(Stream s)

@@ -18,12 +18,17 @@ public partial class TFTPClient : IDisposable
             ErrorMessage = "";
         }
 
-        public TFTPPacket_Error(Stream s)
+        private TFTPPacket_Error(Stream s)
             : this()
         {
             ValidateCode(s);
             ErrorCode = (ErrorCode)ReadUInt16(s);
             ErrorMessage = ReadZString(s);
+        }
+
+        public static new TFTPPacket_Error Deserialize(Stream s)
+        {
+            return new TFTPPacket_Error(s);
         }
 
         public override void Serialize(Stream s)

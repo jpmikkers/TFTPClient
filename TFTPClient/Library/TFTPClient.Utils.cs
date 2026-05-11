@@ -1,34 +1,14 @@
 ﻿using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text;
 
 namespace Baksteen.Net.TFTP.Client;
 
 public partial class TFTPClient : IDisposable
 {
-    /// <summary>
-    /// Generic clip method
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="value">input value</param>
-    /// <param name="minValue">minimum value to clip to</param>
-    /// <param name="maxValue">maximum value to clip to</param>
-    /// <returns></returns>
-    private static T Clip<T>(T value, T minValue, T maxValue) where T : IComparable<T>
-    {
-        T result;
-        if (value.CompareTo(minValue) < 0)
-            result = minValue;
-        else if (value.CompareTo(maxValue) > 0)
-            result = maxValue;
-        else
-            result = value;
-        return result;
-    }
-
     /// <summary>
     /// Converts a string key/value dictionary into a pretty printed string. Example:
     /// 'key1'='value1', 'key2'='value2' ...
@@ -53,10 +33,13 @@ public partial class TFTPClient : IDisposable
         var sb = new StringBuilder();
         limit = Math.Min(data.Count, limit);
 
-        for (int t = 0; t < limit; t++)
+        if (data.Array != null)
         {
-            sb.Append(data.Array[data.Offset + t].ToString("X2"));
-            sb.Append(separator);
+            for (var t = 0; t < limit; t++)
+            {
+                sb.Append(data.Array[data.Offset + t].ToString("X2"));
+                sb.Append(separator);
+            }
         }
 
         if (data.Count > limit)
@@ -72,57 +55,58 @@ public partial class TFTPClient : IDisposable
     }
 
     #region packet serialization/deserialization
-    internal static ushort ReadUInt16(Stream s)
+    internal static ushort ReadUInt16(Stream stream)
     {
-        var br = new BinaryReader(s);
-        return (ushort)IPAddress.NetworkToHostOrder((short)br.ReadUInt16());
+        Span<byte> buf = stackalloc byte[sizeof(ushort)];
+        stream.ReadExactly(buf);
+        return BinaryPrimitives.ReadUInt16BigEndian(buf);
     }
 
-    internal static void WriteUInt16(Stream s, ushort v)
+    internal static void WriteUInt16(Stream stream, ushort value)
     {
-        var bw = new BinaryWriter(s);
-        bw.Write((ushort)IPAddress.HostToNetworkOrder((short)v));
+        Span<byte> buffer = stackalloc byte[sizeof(ushort)];
+        BinaryPrimitives.WriteUInt16BigEndian(buffer, value);
+        stream.Write(buffer);
     }
 
-    internal static Dictionary<string, string> ReadOptions(Stream s)
+    internal static Dictionary<string, string> ReadOptions(Stream stream)
     {
         var options = new Dictionary<string, string>();
-        while (s.Position < s.Length)
+        while (stream.Position < stream.Length)
         {
-            string key = ReadZString(s).ToLower();
-            string val = ReadZString(s).ToLower();
+            var key = ReadZString(stream).ToLower();
+            var val = ReadZString(stream).ToLower();
             options.Add(key, val);
         }
         return options;
     }
 
-    internal static void WriteOptions(Stream s, Dictionary<string, string> options)
+    internal static void WriteOptions(Stream stream, Dictionary<string, string> options)
     {
         foreach (var option in options)
         {
-            WriteZString(s, option.Key);
-            WriteZString(s, option.Value);
+            WriteZString(stream, option.Key);
+            WriteZString(stream, option.Value);
         }
     }
 
-    internal static string ReadZString(Stream s)
+    internal static string ReadZString(Stream stream)
     {
         var sb = new StringBuilder();
-        int c = s.ReadByte();
+        var c = stream.ReadByte();
         while (c > 0)
         {
             sb.Append((char)c);
-            c = s.ReadByte();
+            c = stream.ReadByte();
         }
         return sb.ToString();
     }
 
-    internal static void WriteZString(Stream s, string msg)
+    internal static void WriteZString(Stream stream, string msg)
     {
-        var tw = new StreamWriter(s, Encoding.ASCII);
-        tw.Write(msg);
-        tw.Flush();
-        s.WriteByte(0);
+        var buf = Encoding.ASCII.GetBytes(msg);
+        stream.Write(buf);
+        stream.WriteByte(0);
     }
     #endregion
 }

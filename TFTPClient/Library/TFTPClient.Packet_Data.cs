@@ -17,7 +17,7 @@ public partial class TFTPClient : IDisposable
             Data = new ArraySegment<byte>();
         }
 
-        public TFTPPacket_Data(Stream s)
+        private TFTPPacket_Data(Stream s)
             : this()
         {
             ValidateCode(s);
@@ -27,11 +27,19 @@ public partial class TFTPClient : IDisposable
             Data = new ArraySegment<byte>(data);
         }
 
+        public static new TFTPPacket_Data Deserialize(Stream s)
+        {
+            return new TFTPPacket_Data(s);
+        }
+
         public override void Serialize(Stream s)
         {
             base.Serialize(s);
             WriteUInt16(s, BlockNumber);
-            s.Write(Data.Array, Data.Offset, Data.Count);
+            if (Data.Array != null)
+            {
+                s.Write(Data.Array, Data.Offset, Data.Count);
+            }
         }
 
         public override string ToString()
