@@ -12,7 +12,7 @@
 	<PackageTags>tftp;tftp-protocol;tftp-client;windows;linux</PackageTags>
 	<Version>1.1.0</Version>
     <Authors>jpmikkers</Authors>
-    <Copyright>Copyright © 2025 Jean-Paul Mikkers</Copyright>
+    <Copyright>Copyright © 2026 Jean-Paul Mikkers</Copyright>
 	<Description>multiplatform trivial file transfer protocol (TFTP) client library</Description>
 	<RepositoryType>git</RepositoryType>
 	<RepositoryUrl>https://github.com/jpmikkers/TFTPClient.git</RepositoryUrl>
